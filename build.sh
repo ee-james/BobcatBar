@@ -1,9 +1,14 @@
 #!/bin/bash
-# Build BobcatBar and assemble a menu-bar .app bundle (ad-hoc signed).
-# No restricted entitlements, so ad-hoc signing is fine.
-# Usage: ./build.sh [release|debug] [--install]
-#   --install replaces $INSTALL_DIR/<App>.app (default ~/Applications) and relaunches it if running.
-#   Set INSTALL_DIR in build.local (git-ignored) to install somewhere else.
+## @file    build.sh
+## @author  James Zeman
+## @date    9 SEP 2026
+## @brief   Builds BobcatBar and assembles an ad-hoc signed menu-bar .app bundle
+##          (no restricted entitlements, so ad-hoc signing is fine).
+##
+## @param   release|debug   build configuration (default release).
+## @param   --install       replaces $INSTALL_DIR/<App>.app and relaunches it if it was
+##                          running. INSTALL_DIR defaults to ~/Applications; set it in
+##                          build.local (git ignores it) to install somewhere else.
 set -euo pipefail
 cd "$(dirname "$0")"
 

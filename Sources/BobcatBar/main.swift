@@ -1,3 +1,9 @@
+/**
+ * @file    main.swift
+ * @author  James Zeman
+ * @date    9 SEP 2026
+ * @brief   BobcatBar entry point: starts the menu-bar app.
+ */
 import AppKit
 
 let app = NSApplication.shared

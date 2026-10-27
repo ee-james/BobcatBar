@@ -1,9 +1,24 @@
+/**
+ * @file    Shell.swift
+ * @author  James Zeman
+ * @date    9 SEP 2026
+ * @brief   Thin wrappers around the NSWorkspace calls the menu needs.
+ */
 import Foundation
 import AppKit
 
-/// Thin wrappers around the NSWorkspace calls the menu needs.
+/**
+ * @brief   Opens links and launches apps.
+ */
 enum Shell {
 
+    /**
+     * @brief   Opens a URL, in a specific browser if one is given.
+     *
+     * @param   url      the URL.
+     * @param   browser  a browser name ("Google Chrome") or bundle id; nil for
+the default.
+     */
     static func open(url: String, with browser: String? = nil) {
         guard let u = URL(string: url) else { return }
         guard let browser, !browser.isEmpty else {
@@ -18,11 +33,16 @@ enum Shell {
         }
     }
 
+    /**
+     * @brief   Launches an app.
+     *
+     * @param   target  an app name or bundle id.
+     */
     static func launch(app target: String) {
         if let appURL = appURL(for: target) {
             NSWorkspace.shared.openApplication(at: appURL, configuration: .init())
         } else {
-            // Unknown display name — let `open -a` resolve it by Spotlight.
+            // not a name we know, so let `open -a` find it with Spotlight
             let p = Process()
             p.executableURL = URL(fileURLWithPath: "/usr/bin/open")
             p.arguments = ["-a", target]
@@ -30,7 +50,12 @@ enum Shell {
         }
     }
 
-    /// Resolve an app by bundle id (contains a dot) or by a known display name.
+    /**
+     * @brief   Finds an installed app.
+     *
+     * @param   id      a bundle id (has a dot) or a known name ("chrome").
+     * @return  the app's location, or nil if it isn't installed or isn't known.
+     */
     private static func appURL(for id: String) -> URL? {
         if id.contains("."),
            let u = NSWorkspace.shared.urlForApplication(withBundleIdentifier: id) {
@@ -42,6 +67,9 @@ enum Shell {
         return nil
     }
 
+    /**
+     * @brief   Display names people type in config.json, mapped to bundle ids.
+     */
     private static let knownBundleIDs: [String: String] = [
         "google chrome": "com.google.Chrome",
         "chrome": "com.google.Chrome",

@@ -1,12 +1,27 @@
+/**
+ * @file    AppDelegate.swift
+ * @author  James Zeman
+ * @date    10 SEP 2026
+ * @brief   The BobcatBar menu: pinned links, links, sections with headings
+ *          (Orgs), apps, and the Settings/Reload/Quit items.
+ */
 import AppKit
 
 @MainActor
+/**
+ * @brief   Owns the menu-bar item and rebuilds its menu from config.json.
+ */
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private var statusItem: NSStatusItem!
     private var config = Config.starter
     private var configError: String?
 
+    /**
+     * @brief   Creates the menu-bar item and loads the config.
+     *
+     * @param   notification  unused.
+     */
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.image = Self.menuBarIcon()
@@ -22,6 +37,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     // MARK: - Config
 
+    /**
+     * @brief   Re-reads config.json and rebuilds the menu.
+     *
+     * @param   sender  the menu item, or nil when called from code.
+     */
     @objc func reload(_ sender: Any?) {
         let result = ConfigStore.load()
         config = result.config
@@ -29,6 +49,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         rebuildMenu()
     }
 
+    /**
+     * @brief   Opens config.json in the default editor, writing the starter first if
+     *          there isn't one yet.
+     *
+     * @param   sender  the menu item.
+     */
     @objc func editConfig(_ sender: Any?) {
         if !FileManager.default.fileExists(atPath: ConfigStore.fileURL.path) {
             ConfigStore.writeStarter()
@@ -36,19 +62,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSWorkspace.shared.open(ConfigStore.fileURL)
     }
 
+    /**
+     * @brief   Opens the Settings window. Saving there reloads the menu.
+     *
+     * @param   sender  the menu item.
+     */
     @objc func openSettings(_ sender: Any?) {
         SettingsWindow.show(config: config) { [weak self] in self?.reload(nil) }
     }
 
     // MARK: - NSMenuDelegate
 
-    /// Pick up config edits automatically the next time the menu opens.
+    /**
+     * @brief   Reloads just before the menu shows, so config edits appear right away.
+     *
+     * @param   menu    the menu about to open.
+     */
     func menuWillOpen(_ menu: NSMenu) {
         reload(nil)
     }
 
     // MARK: - Menu
 
+    /**
+     * @brief   Builds the whole menu from the current config. A config error shows
+     *          first, as an item that opens the file.
+     */
     private func rebuildMenu() {
         guard let menu = statusItem.menu else { return }
         menu.removeAllItems()
@@ -104,6 +143,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(quit)
     }
 
+    /**
+     * @brief   Adds one link to a menu.
+     *
+     * @param   menu    the menu to add to.
+     * @param   link    the link; its browser, if set, goes in the tooltip.
+     */
     private func addLink(to menu: NSMenu, _ link: Config.Link) {
         let item = NSMenuItem(title: link.name, action: #selector(openLink(_:)), keyEquivalent: "")
         item.target = self
@@ -116,11 +161,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     // MARK: - Actions
 
+    /**
+     * @brief   Opens a link, in its chosen browser if it has one.
+     *
+     * @param   sender  the menu item; its representedObject is the link.
+     */
     @objc private func openLink(_ sender: NSMenuItem) {
         guard let link = sender.representedObject as? Config.Link else { return }
         Shell.open(url: link.url, with: link.browser)
     }
 
+    /**
+     * @brief   Launches an app from the Apps list.
+     *
+     * @param   sender  the menu item; its representedObject is the app's name or bundle id.
+     */
     @objc private func openApp(_ sender: NSMenuItem) {
         guard let target = sender.representedObject as? String else { return }
         Shell.launch(app: target)
@@ -128,6 +183,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     // MARK: - Icon
 
+    /**
+     * @brief   Loads the menu-bar icon.
+     *
+     * @return  the Supercat template image, or a drawn paw print if the png is missing.
+     */
     static func menuBarIcon() -> NSImage {
         if let url = Bundle.main.url(forResource: "BobcatTemplate@2x", withExtension: "png"),
            let img = NSImage(contentsOf: url) {
@@ -135,7 +195,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             img.isTemplate = true
             return img
         }
-        // Fallback: a simple paw print.
+        // no png in the bundle (a debug run): draw a simple paw print instead
         let img = NSImage(size: NSSize(width: 18, height: 18), flipped: false) { _ in
             NSColor.black.setFill()
             NSBezierPath(ovalIn: NSRect(x: 5, y: 3, width: 8, height: 7)).fill()   // pad

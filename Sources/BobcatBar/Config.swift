@@ -1,46 +1,65 @@
+/**
+ * @file    Config.swift
+ * @author  James Zeman
+ * @date    10 SEP 2026
+ * @brief   BobcatBar's settings: the config.json format, loading and saving it,
+ *          and the starter config for a new install.
+ */
 import Foundation
 
-/// User-editable configuration, loaded from ~/.config/bobcatbar/config.json.
-/// Additive: unknown keys ignored, missing keys use defaults.
+/**
+ * @brief   Everything in config.json (~/.config/bobcatbar). Unknown keys are
+ *          ignored; missing keys use the defaults here.
+ */
 struct Config: Codable {
-    /// Kept in the given order, above everything else.
-    var pinned: [Link] = []
-    /// Sorted alphabetically by name at render time when `sortLinks` is true.
-    var links: [Link] = []
-    /// Local apps to launch (by name or bundle id).
-    var apps: [AppLink] = []
-    /// Extra named categories of links (e.g. "Orgs"), rendered between links and apps
-    /// in the order listed here, each under its name as a heading.
-    var sections: [Section] = []
+    var pinned: [Link] = []        // top of the menu, in the order given
+    var links: [Link] = []         // sorted by name when sortLinks is true
+    var apps: [AppLink] = []       // launched by app name or bundle id
+    var sections: [Section] = []   // e.g. Orgs; shown between links and apps
     var sortLinks: Bool = true
 
+    /**
+     * @brief   A link: name, URL and an optional browser.
+     */
     struct Link: Codable {
         var name: String
         var url: String
-        /// Optional: open in this browser ("Google Chrome", "Safari", or a bundle id).
-        /// Omit to use the system default.
-        var browser: String?
+        var browser: String?   // "Google Chrome", "Safari" or a bundle id; nil = default browser
     }
 
+    /**
+     * @brief   An app to launch.
+     */
     struct AppLink: Codable {
         var name: String
         var target: String   // app name ("Obsidian") or bundle id ("md.obsidian")
     }
 
-    /// A named group of links, shown under `name` as a menu heading (no heading when empty).
+    /**
+     * @brief   A named group of links, shown under its name as a menu heading
+     *          (no heading when the name is empty).
+     */
     struct Section: Codable {
         var name: String = ""
-        /// Sorted alphabetically by name at render time when true.
-        var sort: Bool = true
+        var sort: Bool = true   // sort the items by name
         var items: [Link] = []
     }
 
-    /// The section Settings manages as the Orgs list.
+    /**
+     * @brief   The section Settings manages as the Orgs list.
+     */
     static let orgsName = "Orgs"
 }
 
-/// Missing keys fall back to the defaults above, so a hand-trimmed config.json still loads.
+/**
+ * @brief   Decoding with defaults, so a hand-trimmed config.json still loads.
+ */
 extension Config {
+    /**
+     * @brief   Reads a config, using the default for any missing key.
+     *
+     * @param   decoder  the JSON decoder.
+     */
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         pinned = try c.decodeIfPresent([Link].self, forKey: .pinned) ?? []
@@ -51,7 +70,15 @@ extension Config {
     }
 }
 
+/**
+ * @brief   The same for sections.
+ */
 extension Config.Section {
+    /**
+     * @brief   Reads a section, using the default for any missing key.
+     *
+     * @param   decoder  the JSON decoder.
+     */
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
@@ -60,13 +87,28 @@ extension Config.Section {
     }
 }
 
+/**
+ * @brief   Loads and saves config.json.
+ */
 enum ConfigStore {
+    /**
+     * @brief   The config folder, ~/.config/bobcatbar.
+     */
     static var dir: URL {
         FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".config/bobcatbar", isDirectory: true)
     }
+    /**
+     * @brief   The config file, ~/.config/bobcatbar/config.json.
+     */
     static var fileURL: URL { dir.appendingPathComponent("config.json") }
 
+    /**
+     * @brief   Loads config.json, writing the starter config on the first run.
+     *
+     * @return  the config, plus an error message when the file can't be read or
+     *          parsed (the starter config is used then).
+     */
     static func load() -> (config: Config, error: String?) {
         do {
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
@@ -85,10 +127,18 @@ enum ConfigStore {
         }
     }
 
+    /**
+     * @brief   Writes the starter config to config.json.
+     */
     static func writeStarter() {
         save(.starter)
     }
 
+    /**
+     * @brief   Writes a config to config.json, pretty-printed with sorted keys.
+     *
+     * @param   config  the config to save.
+     */
     static func save(_ config: Config) {
         let e = JSONEncoder()
         e.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes, .sortedKeys]
@@ -98,8 +148,10 @@ enum ConfigStore {
 }
 
 extension Config {
-    /// What a new install starts with: the core Texas State links. Everything else in
-    /// Catalog is a checkbox away in Settings, and Orgs starts empty.
+    /**
+     * @brief   What a new install starts with: the core Texas State links. The rest
+     *          of the catalog is a checkbox away in Settings, and Orgs starts empty.
+     */
     static let starter: Config = {
         var c = Config()
         for name in ["Canvas", "CatsWeb", "Navigate 360",
