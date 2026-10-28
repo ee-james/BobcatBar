@@ -3,7 +3,7 @@
  * @author  James Zeman
  * @date    10 SEP 2026
  * @brief   The BobcatBar menu: pinned links, links, sections with headings
- *          (Orgs), apps, and the Settings/Reload/Quit items.
+ *          (Orgs), apps, Bobcat Scores, and the Settings/Reload/Quit items.
  */
 import AppKit
 
@@ -16,6 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var statusItem: NSStatusItem!
     private var config = Config.starter
     private var configError: String?
+    private let scores = Scores()
 
     /**
      * @brief   Creates the menu-bar item and loads the config.
@@ -32,6 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.autoenablesItems = false
         statusItem.menu = menu
 
+        scores.onChange = { [weak self] in self?.rebuildMenu() }
         reload(nil)
     }
 
@@ -46,6 +48,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let result = ConfigStore.load()
         config = result.config
         configError = result.error
+        if config.scores, !scores.isRunning { scores.start() }
+        if !config.scores, scores.isRunning { scores.stop() }
         rebuildMenu()
     }
 
@@ -79,7 +83,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
      * @param   menu    the menu about to open.
      */
     func menuWillOpen(_ menu: NSMenu) {
+        guard menu === statusItem.menu else { return }   // not the scores submenu
         reload(nil)
+        if config.scores { scores.refresh(ifOlderThan: scores.isLive ? 30 : 120) }
     }
 
     // MARK: - Menu
@@ -132,6 +138,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         if !config.apps.isEmpty { menu.addItem(.separator()) }
 
+        if config.scores {
+            menu.addItem(scoresItem())
+            menu.addItem(.separator())
+        }
+
         let settings = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)
@@ -157,6 +168,66 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             item.toolTip = "Opens in \(link.browser!)"
         }
         menu.addItem(item)
+    }
+
+    /**
+     * @brief   The Bobcat Scores item: the latest game on the line itself, and
+     *          the past week's results and coming week's games in its submenu.
+     *
+     * @return  the item.
+     */
+    private func scoresItem() -> NSMenuItem {
+        let title = scores.headline.map { "Bobcat Scores: " + $0.line(withSport: true) }
+            ?? (scores.updated == nil ? "Bobcat Scores: loading…" : "Bobcat Scores")
+        let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+        let sub = NSMenu()
+        sub.autoenablesItems = false
+
+        sub.addItem(.sectionHeader(title: "Past week"))
+        let past = scores.pastWeek
+        if past.isEmpty { sub.addItem(disabled("No games")) }
+        for game in past { sub.addItem(gameItem(game)) }
+
+        let coming = scores.comingWeek
+        if !coming.isEmpty {
+            sub.addItem(.separator())
+            sub.addItem(.sectionHeader(title: "Coming up"))
+            for game in coming { sub.addItem(gameItem(game)) }
+        }
+
+        sub.addItem(.separator())
+        addLink(to: sub, .init(name: "Texas State Athletics", url: "https://txstatebobcats.com"))
+        if let u = scores.updated {
+            sub.addItem(disabled("Updated " + u.formatted(date: .omitted, time: .shortened) + " · ESPN"))
+        }
+        item.submenu = sub
+        return item
+    }
+
+    /**
+     * @brief   A game in the scores submenu; clicking opens it on ESPN.
+     *
+     * @param   game    the game.
+     * @return  the item.
+     */
+    private func gameItem(_ game: Game) -> NSMenuItem {
+        let item = NSMenuItem(title: game.line(withSport: true), action: #selector(openLink(_:)), keyEquivalent: "")
+        item.target = self
+        item.representedObject = Config.Link(name: game.opponent, url: game.url)
+        item.toolTip = game.sport.name + " · " + game.date.formatted(date: .abbreviated, time: .shortened)
+        return item
+    }
+
+    /**
+     * @brief   A grayed-out line of text.
+     *
+     * @param   text    the text.
+     * @return  the item.
+     */
+    private func disabled(_ text: String) -> NSMenuItem {
+        let item = NSMenuItem(title: text, action: nil, keyEquivalent: "")
+        item.isEnabled = false
+        return item
     }
 
     // MARK: - Actions

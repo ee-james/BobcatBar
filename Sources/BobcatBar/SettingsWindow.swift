@@ -45,6 +45,20 @@ final class SettingsModel: ObservableObject {
     }
 
     /**
+     * @brief   The Bobcat Scores checkbox.
+     *
+     * @return  a binding that reads and changes config.scores, saving on change.
+     */
+    var scores: Binding<Bool> {
+        Binding(
+            get: { self.config.scores },
+            set: { on in
+                self.config.scores = on
+                self.save()
+            })
+    }
+
+    /**
      * @brief   The links in the Orgs section.
      *
      * @return  the Orgs links, or none if there's no Orgs section yet.
@@ -110,7 +124,7 @@ final class SettingsModel: ObservableObject {
 }
 
 /**
- * @brief   The Settings form: one section per catalog group, then Orgs.
+ * @brief   The Settings form: one section per catalog group, then Scores and Orgs.
  */
 struct SettingsView: View {
     @ObservedObject var model: SettingsModel
@@ -123,6 +137,9 @@ struct SettingsView: View {
                         Toggle(item.name, isOn: model.binding(for: item))
                     }
                 }
+            }
+            Section("Scores") {
+                Toggle("Bobcat Scores (past week and coming week, from ESPN)", isOn: model.scores)
             }
             Section("Orgs") {
                 ForEach(model.orgs, id: \.name) { org in

@@ -17,6 +17,7 @@ struct Config: Codable {
     var apps: [AppLink] = []       // launched by app name or bundle id
     var sections: [Section] = []   // e.g. Orgs; shown between links and apps
     var sortLinks: Bool = true
+    var scores: Bool = true        // the Bobcat Scores menu item (ESPN data)
 
     /**
      * @brief   A link: name, URL and an optional browser.
@@ -67,6 +68,7 @@ extension Config {
         apps = try c.decodeIfPresent([AppLink].self, forKey: .apps) ?? []
         sections = try c.decodeIfPresent([Section].self, forKey: .sections) ?? []
         sortLinks = try c.decodeIfPresent(Bool.self, forKey: .sortLinks) ?? true
+        scores = try c.decodeIfPresent(Bool.self, forKey: .scores) ?? true
     }
 }
 
