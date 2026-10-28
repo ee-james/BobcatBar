@@ -9,6 +9,12 @@
 ## @param   --install       replaces $INSTALL_DIR/<App>.app and relaunches it if it was
 ##                          running. INSTALL_DIR defaults to ~/Applications; set it in
 ##                          build.local (git ignores it) to install somewhere else.
+## @param   --release       builds for Apple silicon and Intel, signs with your Developer ID
+##                          (hardened runtime), notarizes, staples, and zips it to
+##                          build/BobcatBar-<version>.zip for a GitHub release. Needs a
+##                          "Developer ID Application" certificate in the keychain and a
+##                          notarytool profile (NOTARY_PROFILE, default "notary"), made once with
+##                          xcrun notarytool store-credentials notary --apple-id <id> --team-id <team>
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -18,18 +24,32 @@ VERSION="0.1.0"
 CONFIG=release
 INSTALL_DIR="$HOME/Applications"
 [[ -f build.local ]] && source build.local
+NOTARY_PROFILE="notary"
 INSTALL=0
+RELEASE=0
 for arg in "$@"; do
   case "$arg" in
     release|debug)     CONFIG="$arg" ;;
     --install|install) INSTALL=1 ;;
-    *) echo "usage: $0 [release|debug] [--install]" >&2; exit 1 ;;
+    --release)         RELEASE=1; CONFIG=release ;;
+    *) echo "usage: $0 [release|debug] [--install] [--release]" >&2; exit 1 ;;
   esac
 done
 
-echo "▸ swift build -c $CONFIG"
-swift build -c "$CONFIG"
-BIN="$(swift build -c "$CONFIG" --show-bin-path)/$APP_NAME"
+if (( RELEASE )); then
+  IDENTITY="$(security find-identity -v -p codesigning | grep -o '"Developer ID Application: [^"]*"' | head -1 | tr -d '"' || true)"
+  if [[ -z "$IDENTITY" ]]; then
+    echo "no Developer ID Application certificate in the keychain (Xcode > Settings > Accounts > Manage Certificates)" >&2
+    exit 1
+  fi
+  ARCHS=(--arch arm64 --arch x86_64)
+else
+  ARCHS=()
+fi
+
+echo "▸ swift build -c $CONFIG ${ARCHS[*]:-}"
+swift build -c "$CONFIG" ${ARCHS[@]+"${ARCHS[@]}"}
+BIN="$(swift build -c "$CONFIG" ${ARCHS[@]+"${ARCHS[@]}"} --show-bin-path)/$APP_NAME"
 
 APP="build/$APP_NAME.app"
 rm -rf "$APP"
@@ -58,11 +78,29 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 </plist>
 PLIST
 
-echo "▸ codesign (ad-hoc)"
-codesign --force --sign - --timestamp=none "$APP"
+if (( RELEASE )); then
+  echo "▸ codesign ($IDENTITY)"
+  codesign --force --options runtime --timestamp --sign "$IDENTITY" "$APP"
+else
+  echo "▸ codesign (ad-hoc)"
+  codesign --force --sign - --timestamp=none "$APP"
+fi
 codesign --verify --verbose=1 "$APP"
 
 echo "▸ built $APP"
+
+if (( RELEASE )); then
+  ZIP="build/$APP_NAME-$VERSION.zip"
+  rm -f "$ZIP"
+  ditto -c -k --keepParent "$APP" "$ZIP"
+  echo "▸ notarizing (a few minutes)"
+  xcrun notarytool submit "$ZIP" --keychain-profile "$NOTARY_PROFILE" --wait
+  xcrun stapler staple "$APP"
+  rm -f "$ZIP"
+  ditto -c -k --keepParent "$APP" "$ZIP"   # again, with the ticket stapled
+  spctl --assess --type execute --verbose "$APP"
+  echo "▸ $ZIP is ready: gh release create v$VERSION $ZIP"
+fi
 
 if (( INSTALL )); then
   DEST="$INSTALL_DIR/$APP_NAME.app"
