@@ -1,0 +1,1217 @@
+{
+ "team": {
+  "id": "326",
+  "displayName": "Texas State Bobcats"
+ },
+ "events": [
+  {
+   "id": "401891939",
+   "date": "2026-08-28T23:00Z",
+   "name": "Oklahoma Sooners at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 0.0,
+        "displayValue": "0"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "201",
+        "displayName": "Oklahoma Sooners",
+        "shortDisplayName": "Oklahoma",
+        "abbreviation": "OU"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901346",
+   "date": "2026-08-30T18:00Z",
+   "name": "Louisiana Ragin' Cajuns at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 0.0,
+        "displayValue": "0"
+       },
+       "winner": false,
+       "team": {
+        "id": "309",
+        "displayName": "Louisiana Ragin' Cajuns",
+        "shortDisplayName": "Louisiana",
+        "abbreviation": "UL"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901279",
+   "date": "2026-09-03T22:00Z",
+   "name": "Texas State Bobcats at UTEP Miners",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "2638",
+        "displayName": "UTEP Miners",
+        "shortDisplayName": "UTEP",
+        "abbreviation": "UTEP"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 2.0,
+        "displayValue": "2"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901486",
+   "date": "2026-09-04T20:30Z",
+   "name": "UT Rio Grande Valley Vaqueros at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 0.0,
+        "displayValue": "0"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "292",
+        "displayName": "UT Rio Grande Valley Vaqueros",
+        "shortDisplayName": "UT Rio Grande",
+        "abbreviation": "RGV"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901487",
+   "date": "2026-09-05T19:00Z",
+   "name": "Texas State Bobcats at Texas A&M-Corpus Christi Islanders",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 1.0,
+        "displayValue": "1"
+       },
+       "winner": false,
+       "team": {
+        "id": "357",
+        "displayName": "Texas A&M-Corpus Christi Islanders",
+        "shortDisplayName": "Texas A&M-CC",
+        "abbreviation": "AMCC"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901488",
+   "date": "2026-09-10T23:00Z",
+   "name": "Texas State Bobcats at Stephen F. Austin Lumberjacks",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 0.0,
+        "displayValue": "0"
+       },
+       "winner": false,
+       "team": {
+        "id": "2617",
+        "displayName": "Stephen F. Austin Lumberjacks",
+        "shortDisplayName": "SF Austin",
+        "abbreviation": "SFA"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401899958",
+   "date": "2026-09-11T20:00Z",
+   "name": "UT Arlington Mavericks at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 2.0,
+        "displayValue": "2"
+       },
+       "winner": false,
+       "team": {
+        "id": "250",
+        "displayName": "UT Arlington Mavericks",
+        "shortDisplayName": "UT Arlington",
+        "abbreviation": "UTA"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401887201",
+   "date": "2026-09-12T16:00Z",
+   "name": "North Texas Mean Green at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 1.0,
+        "displayValue": "1"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "249",
+        "displayName": "North Texas Mean Green",
+        "shortDisplayName": "North Texas",
+        "abbreviation": "UNT"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901493",
+   "date": "2026-09-18T19:30Z",
+   "name": "Texas State Bobcats at Houston Christian Huskies",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 0.0,
+        "displayValue": "0"
+       },
+       "winner": false,
+       "team": {
+        "id": "2277",
+        "displayName": "Houston Christian Huskies",
+        "shortDisplayName": "Hou Christian",
+        "abbreviation": "HCU"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401888872",
+   "date": "2026-09-18T23:30Z",
+   "name": "Texas State Bobcats at Houston Cougars",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "248",
+        "displayName": "Houston Cougars",
+        "shortDisplayName": "Houston",
+        "abbreviation": "HOU"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 2.0,
+        "displayValue": "2"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401887367",
+   "date": "2026-09-19T20:00Z",
+   "name": "UTSA Roadrunners at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 2.0,
+        "displayValue": "2"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "2636",
+        "displayName": "UTSA Roadrunners",
+        "shortDisplayName": "UTSA",
+        "abbreviation": "UTSA"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901489",
+   "date": "2026-09-24T23:00Z",
+   "name": "Utah State Aggies at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 0.0,
+        "displayValue": "0"
+       },
+       "winner": false,
+       "team": {
+        "id": "328",
+        "displayName": "Utah State Aggies",
+        "shortDisplayName": "Utah State",
+        "abbreviation": "USU"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901448",
+   "date": "2026-09-26T17:00Z",
+   "name": "Colorado State Rams at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 0.0,
+        "displayValue": "0"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "36",
+        "displayName": "Colorado State Rams",
+        "shortDisplayName": "Colorado St",
+        "abbreviation": "CSU"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401891879",
+   "date": "2026-10-02T01:00Z",
+   "name": "Texas State Bobcats at Oregon State Beavers",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "204",
+        "displayName": "Oregon State Beavers",
+        "shortDisplayName": "Oregon St",
+        "abbreviation": "ORST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 1.0,
+        "displayValue": "1"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901413",
+   "date": "2026-10-03T18:00Z",
+   "name": "Texas State Bobcats at Boise State Broncos",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "68",
+        "displayName": "Boise State Broncos",
+        "shortDisplayName": "Boise St",
+        "abbreviation": "BOIS"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 0.0,
+        "displayValue": "0"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901480",
+   "date": "2026-10-08T23:00Z",
+   "name": "Gonzaga Bulldogs at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 1.0,
+        "displayValue": "1"
+       },
+       "winner": false,
+       "team": {
+        "id": "2250",
+        "displayName": "Gonzaga Bulldogs",
+        "shortDisplayName": "Gonzaga",
+        "abbreviation": "GONZ"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401891864",
+   "date": "2026-10-10T18:00Z",
+   "name": "Washington State Cougars at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 1.0,
+        "displayValue": "1"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "265",
+        "displayName": "Washington State Cougars",
+        "shortDisplayName": "Washington St",
+        "abbreviation": "WSU"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401891923",
+   "date": "2026-10-14T23:00Z",
+   "name": "Oregon State Beavers at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 0.0,
+        "displayValue": "0"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "204",
+        "displayName": "Oregon State Beavers",
+        "shortDisplayName": "Oregon St",
+        "abbreviation": "ORST"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901490",
+   "date": "2026-10-17T19:00Z",
+   "name": "Texas State Bobcats at San Diego State Aztecs",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "21",
+        "displayName": "San Diego State Aztecs",
+        "shortDisplayName": "San Diego St",
+        "abbreviation": "SDSU"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 0.0,
+        "displayValue": "0"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901482",
+   "date": "2026-10-23T01:00Z",
+   "name": "Texas State Bobcats at Gonzaga Bulldogs",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "2250",
+        "displayName": "Gonzaga Bulldogs",
+        "shortDisplayName": "Gonzaga",
+        "abbreviation": "GONZ"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 2.0,
+        "displayValue": "2"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401891868",
+   "date": "2026-10-24T18:00Z",
+   "name": "Texas State Bobcats at Washington State Cougars",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "post",
+       "completed": true,
+       "detail": "Final",
+       "shortDetail": "Final"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "score": {
+        "value": 3.0,
+        "displayValue": "3"
+       },
+       "winner": true,
+       "team": {
+        "id": "265",
+        "displayName": "Washington State Cougars",
+        "shortDisplayName": "Washington St",
+        "abbreviation": "WSU"
+       }
+      },
+      {
+       "homeAway": "away",
+       "score": {
+        "value": 1.0,
+        "displayValue": "1"
+       },
+       "winner": false,
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901420",
+   "date": "2026-10-31T17:00Z",
+   "name": "Boise State Broncos at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "pre",
+       "completed": false,
+       "detail": "Sat, October 31st at 1:00 PM EDT",
+       "shortDetail": "10/31 - 1:00 PM EDT"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "id": "68",
+        "displayName": "Boise State Broncos",
+        "shortDisplayName": "Boise St",
+        "abbreviation": "BOIS"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901491",
+   "date": "2026-11-05T02:00Z",
+   "name": "Texas State Bobcats at Utah State Aggies",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "pre",
+       "completed": false,
+       "detail": "Wed, November 4th at 9:00 PM EST",
+       "shortDetail": "11/4 - 9:00 PM EST"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "id": "328",
+        "displayName": "Utah State Aggies",
+        "shortDisplayName": "Utah State",
+        "abbreviation": "USU"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901467",
+   "date": "2026-11-07T19:00Z",
+   "name": "Fresno State Bulldogs at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "pre",
+       "completed": false,
+       "detail": "Sat, November 7th at 2:00 PM EST",
+       "shortDetail": "11/7 - 2:00 PM EST"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "id": "278",
+        "displayName": "Fresno State Bulldogs",
+        "shortDisplayName": "Fresno St",
+        "abbreviation": "FRES"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901492",
+   "date": "2026-11-13T00:00Z",
+   "name": "San Diego State Aztecs at Texas State Bobcats",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "pre",
+       "completed": false,
+       "detail": "Thu, November 12th at 7:00 PM EST",
+       "shortDetail": "11/12 - 7:00 PM EST"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "id": "21",
+        "displayName": "San Diego State Aztecs",
+        "shortDisplayName": "San Diego St",
+        "abbreviation": "SDSU"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901456",
+   "date": "2026-11-18T01:00Z",
+   "name": "Texas State Bobcats at Colorado State Rams",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "pre",
+       "completed": false,
+       "detail": "Tue, November 17th at 8:00 PM EST",
+       "shortDetail": "11/17 - 8:00 PM EST"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "id": "36",
+        "displayName": "Colorado State Rams",
+        "shortDisplayName": "Colorado St",
+        "abbreviation": "CSU"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401901469",
+   "date": "2026-11-20T02:00Z",
+   "name": "Texas State Bobcats at Fresno State Bulldogs",
+   "competitions": [
+    {
+     "status": {
+      "type": {
+       "state": "pre",
+       "completed": false,
+       "detail": "Thu, November 19th at 9:00 PM EST",
+       "shortDetail": "11/19 - 9:00 PM EST"
+      }
+     },
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "id": "278",
+        "displayName": "Fresno State Bulldogs",
+        "shortDisplayName": "Fresno St",
+        "abbreviation": "FRES"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "id": "326",
+        "displayName": "Texas State Bobcats",
+        "shortDisplayName": "Texas St",
+        "abbreviation": "TXST"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

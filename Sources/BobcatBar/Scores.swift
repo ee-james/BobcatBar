@@ -32,6 +32,7 @@ struct Sport: Hashable {
 struct Game {
     enum State { case upcoming, live, final }
 
+    let id: String         // ESPN's event id
     let sport: Sport
     let date: Date
     let state: State
@@ -144,32 +145,37 @@ final class Scores {
      * @brief   The game for the menu line: a live one, else the latest result from
      *          the last two weeks, else the next game.
      */
-    var headline: Game? {
-        let all = games.values.joined()
-        if let live = all.filter({ $0.state == .live }).max(by: { $0.date < $1.date }) { return live }
-        let recent = Date().addingTimeInterval(-14 * 86400)
-        if let last = all.filter({ $0.state == .final && $0.us != nil && $0.date > recent }).max(by: { $0.date < $1.date }) {
-            return last
-        }
-        return all.filter { $0.state == .upcoming }.min { $0.date < $1.date }
-    }
+    var headline: Game? { Self.headline(Array(games.values.joined()), now: Date()) }
 
     /**
      * @brief   Live games, then every result from the past week in any sport, newest first.
      */
-    var pastWeek: [Game] {
-        let weekAgo = Date().addingTimeInterval(-7 * 86400)
-        let all = games.values.joined()
-        return all.filter { $0.state == .live }.sorted { $0.date > $1.date }
-            + all.filter { $0.state == .final && $0.date > weekAgo }.sorted { $0.date > $1.date }
-    }
+    var pastWeek: [Game] { Self.pastWeek(Array(games.values.joined()), now: Date()) }
 
     /**
      * @brief   Games in the coming week in any sport, soonest first.
      */
-    var comingWeek: [Game] {
-        let weekOut = Date().addingTimeInterval(7 * 86400)
-        return games.values.joined().filter { $0.state == .upcoming && $0.date < weekOut }.sorted { $0.date < $1.date }
+    var comingWeek: [Game] { Self.comingWeek(Array(games.values.joined()), now: Date()) }
+
+    nonisolated static func headline(_ all: [Game], now: Date) -> Game? {
+        if let live = all.filter({ $0.state == .live }).max(by: { $0.date < $1.date }) { return live }
+        let recent = now.addingTimeInterval(-14 * 86400)
+        if let last = all.filter({ $0.state == .final && $0.us != nil && $0.date > recent }).max(by: { $0.date < $1.date }) {
+            return last
+        }
+        return all.filter { $0.state == .upcoming && $0.date > now }.min { $0.date < $1.date }
+    }
+
+    nonisolated static func pastWeek(_ all: [Game], now: Date) -> [Game] {
+        let weekAgo = now.addingTimeInterval(-7 * 86400)
+        return all.filter { $0.state == .live }.sorted { $0.date > $1.date }
+            + all.filter { $0.state == .final && $0.date > weekAgo }.sorted { $0.date > $1.date }
+    }
+
+    nonisolated static func comingWeek(_ all: [Game], now: Date) -> [Game] {
+        let weekOut = now.addingTimeInterval(7 * 86400)
+        return all.filter { $0.state == .upcoming && $0.date > now.addingTimeInterval(-6 * 3600) && $0.date < weekOut }
+            .sorted { $0.date < $1.date }
     }
 
     // MARK: - ESPN
@@ -185,8 +191,19 @@ final class Scores {
         var req = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 15)
         req.setValue("BobcatBar", forHTTPHeaderField: "User-Agent")
         guard let (data, resp) = try? await URLSession.shared.data(for: req),
-              (resp as? HTTPURLResponse)?.statusCode == 200,
-              let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              (resp as? HTTPURLResponse)?.statusCode == 200 else { return nil }
+        return parse(data: data, sport)
+    }
+
+    /**
+     * @brief   Parses an ESPN team schedule.
+     *
+     * @param   data    the JSON response.
+     * @param   sport   the sport it's for.
+     * @return  its games by date, or nil when it isn't a schedule.
+     */
+    nonisolated static func parse(data: Data, _ sport: Sport) -> [Game]? {
+        guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let events = root["events"] as? [[String: Any]] else { return nil }
         return events.compactMap { parse($0, sport) }.sorted { $0.date < $1.date }
     }
@@ -194,7 +211,7 @@ final class Scores {
     /**
      * @brief   Turns one ESPN event into a Game, or nil if it's missing what we need.
      */
-    nonisolated private static func parse(_ e: [String: Any], _ sport: Sport) -> Game? {
+    nonisolated static func parse(_ e: [String: Any], _ sport: Sport) -> Game? {
         guard let id = e["id"] as? String,
               let date = (e["date"] as? String).flatMap(parseDate),
               let comp = (e["competitions"] as? [[String: Any]])?.first,
@@ -211,7 +228,7 @@ final class Scores {
         }
         let opp = theirs["team"] as? [String: Any]
         return Game(
-            sport: sport, date: date, state: state,
+            id: id, sport: sport, date: date, state: state,
             opponent: (opp?["shortDisplayName"] as? String) ?? (opp?["displayName"] as? String) ?? "TBA",
             home: (ours["homeAway"] as? String) == "home",
             us: score(ours), them: score(theirs),
@@ -224,7 +241,7 @@ final class Scores {
      * @brief   A competitor's score: an object with displayValue on schedules, a plain
      *          string on scoreboards.
      */
-    nonisolated private static func score(_ c: [String: Any]) -> String? {
+    nonisolated static func score(_ c: [String: Any]) -> String? {
         if let s = c["score"] as? [String: Any] { return s["displayValue"] as? String }
         return c["score"] as? String
     }
@@ -232,7 +249,7 @@ final class Scores {
     /**
      * @brief   ESPN dates look like "2026-10-24T23:30Z", sometimes with seconds.
      */
-    nonisolated private static func parseDate(_ s: String) -> Date? {
+    nonisolated static func parseDate(_ s: String) -> Date? {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.timeZone = TimeZone(identifier: "UTC")

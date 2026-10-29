@@ -8,6 +8,8 @@ let package = Package(
         .executableTarget(
             name: "BobcatBar",
             path: "Sources/BobcatBar"
-        )
+        ),
+        .testTarget(name: "BobcatBarTests", dependencies: ["BobcatBar"], path: "Tests/BobcatBarTests",
+                    exclude: ["Fixtures"]),
     ]
 )
