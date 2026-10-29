@@ -126,22 +126,15 @@ enum Catalog {
      *
      * @param   item    the catalog item.
      * @param   link    the config link.
-     * @return  true for the same name or the same host (ignoring www.).
+     * @return  true for the same name or the same address (ignoring www. and a
+     *          trailing slash). A different page on the same site is the user's own.
      */
     private static func matches(_ item: Item, _ link: Config.Link) -> Bool {
         guard item.group != .apps else { return false }
         if link.name.caseInsensitiveCompare(item.name) == .orderedSame { return true }
-        guard let a = host(item.target), let b = host(link.url) else { return false }
-        return a == b
+        return normalized(item.target) == normalized(link.url)
     }
 
-    /**
-     * @brief   Whether a config app is this catalog item.
-     *
-     * @param   item    the catalog item.
-     * @param   app     the config app.
-     * @return  true for the same name or target.
-     */
     private static func matches(_ item: Item, _ app: Config.AppLink) -> Bool {
         item.group == .apps
             && (app.name.caseInsensitiveCompare(item.name) == .orderedSame
@@ -149,13 +142,27 @@ enum Catalog {
     }
 
     /**
-     * @brief   Gets a URL's host for matching.
+     * @brief   A URL reduced for matching.
      *
      * @param   url     the URL.
-     * @return  the lowercased host without www., or nil if there isn't one.
+     * @return  host (lowercased, without www.) plus path without trailing slashes,
+     *          query and fragment; nil if there's no host.
      */
-    private static func host(_ url: String) -> String? {
-        guard let h = URL(string: url)?.host?.lowercased() else { return nil }
-        return h.hasPrefix("www.") ? String(h.dropFirst(4)) : h
+    private static func normalized(_ url: String) -> String? {
+        guard let u = URLComponents(string: url), var h = u.host?.lowercased() else { return nil }
+        if h.hasPrefix("www.") { h.removeFirst(4) }
+        var path = u.percentEncodedPath
+        while path.hasSuffix("/") { path.removeLast() }
+        return h + path + (u.percentEncodedQuery.map { "?" + $0 } ?? "") + (u.percentEncodedFragment.map { "#" + $0 } ?? "")
+    }
+
+    /**
+     * @brief   Whether a link in config.json is one of the catalog's (by name or address),
+     *          as opposed to one the user added.
+     *
+     * @param   link    the link.
+     */
+    static func isCatalogLink(_ link: Config.Link) -> Bool {
+        items.contains { matches($0, link) }
     }
 }

@@ -16,6 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var statusItem: NSStatusItem!
     private var config = Config.starter
     private var configError: String?
+    private var configStamp = ""
     private let scores = Scores()
 
     /**
@@ -48,9 +49,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let result = ConfigStore.load()
         config = result.config
         configError = result.error
+        configStamp = ConfigStore.stamp()
         if config.scores, !scores.isRunning { scores.start() }
         if !config.scores, scores.isRunning { scores.stop() }
         rebuildMenu()
+        if sender != nil { SettingsWindow.configChanged() }
+    }
+
+    /**
+     * @brief   Reloads only if config.json changed since it was last read.
+     */
+    private func reloadIfChanged() {
+        if ConfigStore.stamp() != configStamp { reload(self) }
     }
 
     /**
@@ -72,19 +82,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
      * @param   sender  the menu item.
      */
     @objc func openSettings(_ sender: Any?) {
-        SettingsWindow.show(config: config) { [weak self] in self?.reload(nil) }
+        SettingsWindow.show(config: config, error: configError) { [weak self] in self?.reload(nil) }
     }
 
     // MARK: - NSMenuDelegate
 
     /**
-     * @brief   Reloads just before the menu shows, so config edits appear right away.
+     * @brief   Reloads just before the menu shows if config.json was edited, so
+     *          changes appear right away.
      *
      * @param   menu    the menu about to open.
      */
     func menuWillOpen(_ menu: NSMenu) {
         guard menu === statusItem.menu else { return }   // not the scores submenu
-        reload(nil)
+        reloadIfChanged()
         if config.scores { scores.refresh(ifOlderThan: scores.isLive ? 30 : 120) }
     }
 

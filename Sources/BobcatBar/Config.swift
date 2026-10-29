@@ -90,62 +90,139 @@ extension Config.Section {
 }
 
 /**
- * @brief   Loads and saves config.json.
+ * @brief   Loads and saves config.json. A file that doesn't parse is never written
+ *          over: changes go through update(), which re-reads the file first, and
+ *          every save keeps the previous version as config.json.bak.
  */
 enum ConfigStore {
     /**
-     * @brief   The config folder, ~/.config/bobcatbar.
+     * @brief   The config folder, ~/.config/bobcatbar. Tests point it elsewhere.
      */
-    static var dir: URL {
-        FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".config/bobcatbar", isDirectory: true)
-    }
+    nonisolated(unsafe) static var dir: URL =
+        FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".config/bobcatbar", isDirectory: true)
     /**
      * @brief   The config file, ~/.config/bobcatbar/config.json.
      */
     static var fileURL: URL { dir.appendingPathComponent("config.json") }
+    /**
+     * @brief   The version before the last save.
+     */
+    static var backupURL: URL { dir.appendingPathComponent("config.json.bak") }
+
+    /**
+     * @brief   Why config.json can't be used; the message is shown in the menu and Settings.
+     */
+    struct Failure: Error, Equatable {
+        let message: String
+    }
 
     /**
      * @brief   Loads config.json, writing the starter config on the first run.
      *
      * @return  the config, plus an error message when the file can't be read or
-     *          parsed (the starter config is used then).
+     *          parsed (the starter config is used then, but never saved over it).
      */
     static func load() -> (config: Config, error: String?) {
+        switch read() {
+        case .success(let c): return (c, nil)
+        case .failure(let f): return (.starter, f.message)
+        }
+    }
+
+    /**
+     * @brief   Reads config.json, writing the starter config if there isn't one.
+     */
+    static func read() -> Result<Config, Failure> {
         do {
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         } catch {
-            return (.starter, "Could not create \(dir.path): \(error.localizedDescription)")
+            return .failure(.init(message: "Could not create \(dir.path): \(error.localizedDescription)"))
         }
         if !FileManager.default.fileExists(atPath: fileURL.path) {
             writeStarter()
-            return (.starter, nil)
+            return .success(.starter)
         }
         do {
             let data = try Data(contentsOf: fileURL)
-            return (try JSONDecoder().decode(Config.self, from: data), nil)
+            return .success(try JSONDecoder().decode(Config.self, from: data))
+        } catch let e as DecodingError {
+            return .failure(.init(message: "config.json has an error: \(describe(e))"))
         } catch {
-            return (.starter, "config.json parse error: \(error.localizedDescription)")
+            return .failure(.init(message: "config.json can't be read: \(error.localizedDescription)"))
         }
+    }
+
+    /**
+     * @brief   Changes config.json: re-reads it (so edits made in an editor since are
+     *          kept), applies the change and saves.
+     *
+     * @param   change  the edit.
+     * @return  the saved config, or why the file couldn't be changed.
+     */
+    @discardableResult
+    static func update(_ change: (inout Config) -> Void) -> Result<Config, Failure> {
+        read().flatMap { current in
+            var c = current
+            change(&c)
+            return save(c).map { c }
+        }
+    }
+
+    /**
+     * @brief   A modification stamp for config.json, to tell whether it changed.
+     */
+    static func stamp() -> String {
+        let a = try? FileManager.default.attributesOfItem(atPath: fileURL.path)
+        let m = (a?[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0
+        return "\(m)/\((a?[.size] as? Int) ?? -1)"
     }
 
     /**
      * @brief   Writes the starter config to config.json.
      */
     static func writeStarter() {
-        save(.starter)
+        _ = save(.starter)
     }
 
     /**
-     * @brief   Writes a config to config.json, pretty-printed with sorted keys.
+     * @brief   Writes a config to config.json, pretty-printed with sorted keys, after
+     *          copying the current file to config.json.bak.
      *
      * @param   config  the config to save.
      */
-    static func save(_ config: Config) {
+    static func save(_ config: Config) -> Result<Void, Failure> {
         let e = JSONEncoder()
         e.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes, .sortedKeys]
-        guard let data = try? e.encode(config) else { return }
-        try? data.write(to: fileURL, options: .atomic)
+        do {
+            let data = try e.encode(config)
+            let fm = FileManager.default
+            if fm.fileExists(atPath: fileURL.path) {
+                try? fm.removeItem(at: backupURL)
+                try fm.copyItem(at: fileURL, to: backupURL)
+            }
+            try data.write(to: fileURL, options: .atomic)
+            return .success(())
+        } catch {
+            return .failure(.init(message: "Could not save config.json: \(error.localizedDescription)"))
+        }
+    }
+
+    /**
+     * @brief   A short description of a JSON error, with where it is.
+     */
+    private static func describe(_ e: DecodingError) -> String {
+        func path(_ c: DecodingError.Context) -> String {
+            let p = c.codingPath.map { $0.intValue.map { "[\($0)]" } ?? "." + $0.stringValue }.joined()
+            return p.isEmpty ? "" : " at \(p.hasPrefix(".") ? String(p.dropFirst()) : p)"
+        }
+        switch e {
+        case .dataCorrupted(let c):
+            let detail = (c.underlyingError as NSError?)?.userInfo[NSDebugDescriptionErrorKey] as? String
+            return detail ?? c.debugDescription
+        case .keyNotFound(let k, let c): return "missing \"\(k.stringValue)\"" + path(c)
+        case .typeMismatch(_, let c), .valueNotFound(_, let c): return c.debugDescription + path(c)
+        @unknown default: return e.localizedDescription
+        }
     }
 }
 
