@@ -43,7 +43,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             guard let self else { return }
             notifier.check(scores.all)
         }
+        CatalogUpdater.loadCached()
         reload(nil)
+        refreshCatalog()
+        Timer.scheduledTimer(withTimeInterval: 6 * 3600, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.refreshCatalog() }
+        }
 
         // a new install opens at login; Settings can turn it off
         if ConfigStore.isFirstRun, LoginItem.placementProblem == nil, !LoginItem.isEnabled {
@@ -69,6 +74,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if !config.scores, scores.isRunning { scores.stop() }
         rebuildMenu()
         if sender != nil { SettingsWindow.configChanged() }
+    }
+
+    /**
+     * @brief   Checks GitHub for link fixes when the cached catalog is a day old.
+     */
+    private func refreshCatalog() {
+        guard config.updateCatalog, CatalogUpdater.isStale else { return }
+        CatalogUpdater.refresh { [weak self] in self?.reload(self) }
     }
 
     /**

@@ -2,8 +2,10 @@
  * @file    Catalog.swift
  * @author  James Zeman
  * @date    27 OCT 2026
- * @brief   The built-in Texas State links and apps that Settings offers as
- *          checkboxes, and how they're matched against config.json.
+ * @brief   The Texas State links and apps that Settings offers as checkboxes,
+ *          and how they're matched against config.json. The list is built in and
+ *          also kept in the repo as catalog.json, which BobcatBar checks daily so a
+ *          dead link can be fixed without a new release (CatalogUpdater).
  */
 import Foundation
 
@@ -15,46 +17,57 @@ enum Catalog {
     /**
      * @brief   Where a catalog item goes when it's checked.
      */
-    enum Group: String, CaseIterable {
-        case pinned = "Pinned (top of the menu)"
-        case links = "Links"
-        case apps = "Apps"
+    enum Group: String, CaseIterable, Codable {
+        case pinned, links, apps
+
+        var title: String {
+            switch self {
+            case .pinned: return "Pinned (top of the menu)"
+            case .links: return "Links"
+            case .apps: return "Apps"
+            }
+        }
     }
 
     /**
      * @brief   One checkbox: a link (URL) or an app (name or bundle id).
      */
-    struct Item: Identifiable {
+    struct Item: Identifiable, Codable, Equatable {
+        let id: String       // stable, so renaming an item keeps its checkbox
         let name: String
         let target: String   // URL for links, app name or bundle id for apps
         let group: Group
         var browser: String? = nil
-        var id: String { name }
     }
+
+    /**
+     * @brief   The list in use: the built-in one, or the last good catalog.json.
+     */
+    nonisolated(unsafe) static var items: [Item] = builtIn
 
     /**
      * @brief   Everything Settings offers. TXST rebranded txstate.edu to txst.edu,
      *          but a few services (Degree Audit) still live on txstate.edu hosts.
      */
-    static let items: [Item] = [
-        .init(name: "Canvas", target: "https://txstate.instructure.com", group: .pinned),
-        .init(name: "CatsWeb", target: "https://www.catsweb.txst.edu/students.html", group: .pinned),
-        .init(name: "Navigate 360", target: "https://txst.navigate.eab.com/app/#/authentication/remote/", group: .pinned),
-        .init(name: "Genio", target: "https://app.genio.co", group: .pinned),
+    static let builtIn: [Item] = [
+        .init(id: "canvas", name: "Canvas", target: "https://txstate.instructure.com", group: .pinned),
+        .init(id: "catsweb", name: "CatsWeb", target: "https://www.catsweb.txst.edu/students.html", group: .pinned),
+        .init(id: "navigate-360", name: "Navigate 360", target: "https://txst.navigate.eab.com/app/#/authentication/remote/", group: .pinned),
+        .init(id: "genio", name: "Genio", target: "https://app.genio.co", group: .pinned),
 
-        .init(name: "Campus Map", target: "https://maps.txst.edu", group: .links),
-        .init(name: "Computer Science", target: "https://cs.txst.edu", group: .links),
-        .init(name: "Degree Audit", target: "https://dw-prod.ec.txstate.edu/responsiveDashboard/worksheets/WEB31", group: .links),
-        .init(name: "Disability Services", target: "https://disability.txst.edu", group: .links),
-        .init(name: "Financial Aid", target: "https://www.finaid.txst.edu", group: .links),
-        .init(name: "Ingram School of Eng.", target: "https://www.engineering.txst.edu", group: .links),
-        .init(name: "Parking Services", target: "https://www.parking.txst.edu", group: .links),
-        .init(name: "Registration", target: "https://www.registrar.txst.edu", group: .links),
-        .init(name: "Student Balance", target: "https://www.sbs.txst.edu", group: .links),
-        .init(name: "Veterans Affairs", target: "https://va.txst.edu", group: .links),
+        .init(id: "campus-map", name: "Campus Map", target: "https://maps.txst.edu", group: .links),
+        .init(id: "computer-science", name: "Computer Science", target: "https://cs.txst.edu", group: .links),
+        .init(id: "degree-audit", name: "Degree Audit", target: "https://dw-prod.ec.txstate.edu/responsiveDashboard/worksheets/WEB31", group: .links),
+        .init(id: "disability-services", name: "Disability Services", target: "https://disability.txst.edu", group: .links),
+        .init(id: "financial-aid", name: "Financial Aid", target: "https://www.finaid.txst.edu", group: .links),
+        .init(id: "ingram-school-of-eng", name: "Ingram School of Eng.", target: "https://www.engineering.txst.edu", group: .links),
+        .init(id: "parking-services", name: "Parking Services", target: "https://www.parking.txst.edu", group: .links),
+        .init(id: "registration", name: "Registration", target: "https://www.registrar.txst.edu", group: .links),
+        .init(id: "student-balance", name: "Student Balance", target: "https://www.sbs.txst.edu", group: .links),
+        .init(id: "veterans-affairs", name: "Veterans Affairs", target: "https://va.txst.edu", group: .links),
 
-        .init(name: "Obsidian", target: "md.obsidian", group: .apps),
-        .init(name: "Chrome", target: "chrome", group: .apps),
+        .init(id: "obsidian", name: "Obsidian", target: "md.obsidian", group: .apps),
+        .init(id: "chrome", name: "Chrome", target: "chrome", group: .apps),
     ]
 
     /**
@@ -148,7 +161,7 @@ enum Catalog {
      * @return  host (lowercased, without www.) plus path without trailing slashes,
      *          query and fragment; nil if there's no host.
      */
-    private static func normalized(_ url: String) -> String? {
+    static func normalized(_ url: String) -> String? {
         guard let u = URLComponents(string: url), var h = u.host?.lowercased() else { return nil }
         if h.hasPrefix("www.") { h.removeFirst(4) }
         var path = u.percentEncodedPath

@@ -269,3 +269,42 @@ final class MenuIconTests: XCTestCase {
         XCTAssertNil(MenuIcon.templateMask(image(40, 40, opaque: false)))
     }
 }
+
+final class CatalogUpdaterTests: XCTestCase {
+    let repoCatalog = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        .deletingLastPathComponent().appendingPathComponent("catalog.json")
+
+    func testRepoCatalogMatchesBuiltIn() throws {
+        // catalog.json is what installed copies download; keep it in step with Catalog.builtIn
+        let items = try XCTUnwrap(CatalogUpdater.validate(try Data(contentsOf: repoCatalog)))
+        XCTAssertEqual(items, Catalog.builtIn)
+    }
+
+    func json(_ items: [[String: String]]) -> Data {
+        try! JSONSerialization.data(withJSONObject: ["version": 1, "items": items])
+    }
+
+    func testRejectsBadCatalogs() {
+        XCTAssertNotNil(CatalogUpdater.validate(json([["id": "a", "name": "A", "target": "https://a.txst.edu", "group": "links"]])))
+        XCTAssertNil(CatalogUpdater.validate(json([["id": "a", "name": "A", "target": "http://a.txst.edu", "group": "links"]])))
+        XCTAssertNil(CatalogUpdater.validate(json([["id": "a", "name": "A", "target": "javascript:alert(1)", "group": "links"]])))
+        XCTAssertNil(CatalogUpdater.validate(json([["id": "a", "name": "A", "target": "/Applications/Evil.app/x", "group": "apps"]])))
+        XCTAssertNil(CatalogUpdater.validate(json([["id": "a", "name": "A", "target": "https://a.edu", "group": "links"],
+                                                   ["id": "a", "name": "B", "target": "https://b.edu", "group": "links"]])))
+        XCTAssertNil(CatalogUpdater.validate(json([])))
+        XCTAssertNil(CatalogUpdater.validate(Data("<html>".utf8)))
+    }
+
+    func testMovedLinkFollowsInConfig() {
+        let old = [Catalog.Item(id: "map", name: "Campus Map", target: "https://maps.txst.edu", group: .links)]
+        let new = [Catalog.Item(id: "map", name: "Maps", target: "https://map.txst.edu/campus", group: .links)]
+        var c = Config()
+        c.links = [.init(name: "Campus Map", url: "https://maps.txst.edu/"),
+                   .init(name: "My map", url: "https://maps.txst.edu/parking")]   // a different page: left alone
+        XCTAssertTrue(CatalogUpdater.needsMigration(from: old, to: new))
+        CatalogUpdater.migrate(&c, from: old, to: new)
+        XCTAssertEqual(c.links.map(\.name), ["Maps", "My map"])
+        XCTAssertEqual(c.links.map(\.url), ["https://map.txst.edu/campus", "https://maps.txst.edu/parking"])
+        XCTAssertFalse(CatalogUpdater.needsMigration(from: new, to: new))
+    }
+}

@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "canvas",
+      "name": "Canvas",
+      "target": "https://txstate.instructure.com",
+      "group": "pinned"
+    },
+    {
+      "id": "catsweb",
+      "name": "CatsWeb",
+      "target": "https://www.catsweb.txst.edu/students.html",
+      "group": "pinned"
+    },
+    {
+      "id": "navigate-360",
+      "name": "Navigate 360",
+      "target": "https://txst.navigate.eab.com/app/#/authentication/remote/",
+      "group": "pinned"
+    },
+    {
+      "id": "genio",
+      "name": "Genio",
+      "target": "https://app.genio.co",
+      "group": "pinned"
+    },
+    {
+      "id": "campus-map",
+      "name": "Campus Map",
+      "target": "https://maps.txst.edu",
+      "group": "links"
+    },
+    {
+      "id": "computer-science",
+      "name": "Computer Science",
+      "target": "https://cs.txst.edu",
+      "group": "links"
+    },
+    {
+      "id": "degree-audit",
+      "name": "Degree Audit",
+      "target": "https://dw-prod.ec.txstate.edu/responsiveDashboard/worksheets/WEB31",
+      "group": "links"
+    },
+    {
+      "id": "disability-services",
+      "name": "Disability Services",
+      "target": "https://disability.txst.edu",
+      "group": "links"
+    },
+    {
+      "id": "financial-aid",
+      "name": "Financial Aid",
+      "target": "https://www.finaid.txst.edu",
+      "group": "links"
+    },
+    {
+      "id": "ingram-school-of-eng",
+      "name": "Ingram School of Eng.",
+      "target": "https://www.engineering.txst.edu",
+      "group": "links"
+    },
+    {
+      "id": "parking-services",
+      "name": "Parking Services",
+      "target": "https://www.parking.txst.edu",
+      "group": "links"
+    },
+    {
+      "id": "registration",
+      "name": "Registration",
+      "target": "https://www.registrar.txst.edu",
+      "group": "links"
+    },
+    {
+      "id": "student-balance",
+      "name": "Student Balance",
+      "target": "https://www.sbs.txst.edu",
+      "group": "links"
+    },
+    {
+      "id": "veterans-affairs",
+      "name": "Veterans Affairs",
+      "target": "https://va.txst.edu",
+      "group": "links"
+    },
+    {
+      "id": "obsidian",
+      "name": "Obsidian",
+      "target": "md.obsidian",
+      "group": "apps"
+    },
+    {
+      "id": "chrome",
+      "name": "Chrome",
+      "target": "chrome",
+      "group": "apps"
+    }
+  ]
+}

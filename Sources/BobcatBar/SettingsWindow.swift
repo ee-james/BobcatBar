@@ -365,6 +365,12 @@ struct SettingsView: View {
                          : "Icons follow the menu bar's light or dark look. Your own image stays on your Mac.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
+                Section {
+                    Toggle("Get campus link fixes from GitHub daily", isOn: model.binding(\.updateCatalog))
+                } header: {
+                    SectionHeader("Updates", "Downloads the shared link list (catalog.json); nothing about you is sent.")
+                }
+
                 Section("About") {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
@@ -382,7 +388,7 @@ struct SettingsView: View {
 
             page {
                 ForEach(Catalog.Group.allCases, id: \.self) { group in
-                    Section(group.rawValue) {
+                    Section(group.title) {
                         ForEach(Catalog.items.filter { $0.group == group }) { item in
                             Toggle(item.name, isOn: model.binding(for: item))
                         }

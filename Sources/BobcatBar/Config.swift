@@ -23,6 +23,7 @@ struct Config: Codable {
     var notifyFinal: Bool = true   // ...when a game ends
     var icon: String = "supercat"  // menu-bar icon: "supercat", "paw" or "custom" (menubar-icon.png)
     var iconColor: Bool = false    // show a custom icon in its own colors instead of as a template
+    var updateCatalog: Bool = true // fetch link fixes (catalog.json) from GitHub once a day
 
     /**
      * @brief   A link: name, URL and an optional browser.
@@ -79,6 +80,7 @@ extension Config {
         notifyFinal = try c.decodeIfPresent(Bool.self, forKey: .notifyFinal) ?? true
         icon = try c.decodeIfPresent(String.self, forKey: .icon) ?? "supercat"
         iconColor = try c.decodeIfPresent(Bool.self, forKey: .iconColor) ?? false
+        updateCatalog = try c.decodeIfPresent(Bool.self, forKey: .updateCatalog) ?? true
     }
 }
 
