@@ -1,4 +1,5 @@
 import XCTest
+import AppKit
 @testable import BobcatBar
 
 /// Fixtures in this folder: trimmed real ESPN schedules saved on 2026-10-28.
@@ -267,6 +268,26 @@ final class MenuIconTests: XCTestCase {
 
     func testTransparentLogoIsUsedAsIs() {
         XCTAssertNil(MenuIcon.templateMask(image(40, 40, opaque: false)))
+    }
+
+    func testImportJPEG() throws {
+        let saved = ConfigStore.dir
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("bobcatbar-icon-\(UUID().uuidString)")
+        ConfigStore.dir = dir
+        defer { ConfigStore.dir = saved; try? FileManager.default.removeItem(at: dir) }
+
+        let jpeg = dir.appendingPathComponent("logo.jpg")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let rep = NSBitmapImageRep(cgImage: image(300, 200, opaque: true))
+        try XCTUnwrap(rep.representation(using: .jpeg, properties: [:])).write(to: jpeg)
+
+        try MenuIcon.importImage(from: jpeg)
+        let icon = try XCTUnwrap(MenuIcon.custom(color: false))
+        XCTAssertEqual(icon.size.height, 18)
+        XCTAssertEqual(icon.size.width, 27)   // 3:2, 18 points tall
+        XCTAssertTrue(icon.isTemplate)
+        XCTAssertFalse(try XCTUnwrap(MenuIcon.custom(color: true)).isTemplate)
+        XCTAssertThrowsError(try MenuIcon.importImage(from: dir.appendingPathComponent("nope.png")))
     }
 }
 
