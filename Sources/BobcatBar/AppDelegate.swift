@@ -18,6 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var configError: String?
     private var configStamp = ""
     private let scores = Scores()
+    private let notifier = Notifier()
 
     /**
      * @brief   Creates the menu-bar item and loads the config.
@@ -26,7 +27,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
      */
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusItem.button?.image = Self.menuBarIcon()
         statusItem.button?.toolTip = "BobcatBar"
 
         let menu = NSMenu()
@@ -34,8 +34,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.autoenablesItems = false
         statusItem.menu = menu
 
-        scores.onChange = { [weak self] in self?.rebuildMenu() }
+        scores.onChange = { [weak self] in
+            guard let self else { return }
+            rebuildMenu()
+            notifier.check(scores.all)
+        }
+        scores.onTick = { [weak self] in
+            guard let self else { return }
+            notifier.check(scores.all)
+        }
         reload(nil)
+
+        // a new install opens at login; Settings can turn it off
+        if ConfigStore.isFirstRun, LoginItem.placementProblem == nil, !LoginItem.isEnabled {
+            LoginItem.set(true)
+        }
     }
 
     // MARK: - Config
@@ -50,6 +63,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         config = result.config
         configError = result.error
         configStamp = ConfigStore.stamp()
+        statusItem.button?.image = MenuIcon.image(for: config)
+        notifier.configure(config)
         if config.scores, !scores.isRunning { scores.start() }
         if !config.scores, scores.isRunning { scores.stop() }
         rebuildMenu()
@@ -305,33 +320,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func openApp(_ sender: NSMenuItem) {
         guard let target = sender.representedObject as? String else { return }
         Shell.launch(app: target)
-    }
-
-    // MARK: - Icon
-
-    /**
-     * @brief   Loads the menu-bar icon.
-     *
-     * @return  the Supercat template image, or a drawn paw print if the png is missing.
-     */
-    static func menuBarIcon() -> NSImage {
-        if let url = Bundle.main.url(forResource: "BobcatTemplate@2x", withExtension: "png"),
-           let img = NSImage(contentsOf: url) {
-            img.size = NSSize(width: 18, height: 18)
-            img.isTemplate = true
-            return img
-        }
-        // no png in the bundle (a debug run): draw a simple paw print instead
-        let img = NSImage(size: NSSize(width: 18, height: 18), flipped: false) { _ in
-            NSColor.black.setFill()
-            NSBezierPath(ovalIn: NSRect(x: 5, y: 3, width: 8, height: 7)).fill()   // pad
-            for cx in [4.0, 7.5, 11.0, 14.0] {
-                let y = cx == 7.5 || cx == 11.0 ? 11.0 : 9.0
-                NSBezierPath(ovalIn: NSRect(x: cx - 1.6, y: y, width: 3.2, height: 4)).fill()
-            }
-            return true
-        }
-        img.isTemplate = true
-        return img
     }
 }

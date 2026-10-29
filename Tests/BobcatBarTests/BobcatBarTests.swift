@@ -198,3 +198,74 @@ final class LinkDraftTests: XCTestCase {
         XCTAssertNotNil(d.problem)
     }
 }
+
+final class NotifierTests: XCTestCase {
+    func game(_ id: String, _ state: Game.State, at date: Date, us: String? = nil, them: String? = nil,
+              won: Bool? = nil, sport: String = "Football") -> Game {
+        Game(id: id, sport: BobcatBarTests.sport(sport), date: date, state: state, opponent: "Boise St", home: false,
+             us: us, them: them, won: won, detail: state == .final ? "Final" : "", url: "https://espn.com/\(id)")
+    }
+
+    func testStartingSoon() {
+        let now = fixtureNow
+        let soon = game("1", .upcoming, at: now.addingTimeInterval(25 * 60))
+        let later = game("2", .upcoming, at: now.addingTimeInterval(3 * 3600))
+        let e = Notifier.events([soon, later], lastState: [:], notified: [], sports: ["Football"],
+                                start: true, final: true, now: now)
+        XCTAssertEqual(e.map(\.key), ["start:1"])
+        XCTAssertEqual(e.first?.title, "🏈 Texas State at Boise St starts in 25 min")
+        XCTAssertTrue(Notifier.events([soon], lastState: [:], notified: ["start:1"], sports: ["Football"],
+                                      start: true, final: true, now: now).isEmpty)
+        XCTAssertTrue(Notifier.events([soon], lastState: [:], notified: [], sports: ["Volleyball"],
+                                      start: true, final: true, now: now).isEmpty)
+        XCTAssertTrue(Notifier.events([soon], lastState: [:], notified: [], sports: ["Football"],
+                                      start: false, final: true, now: now).isEmpty)
+    }
+
+    func testFinalOnlyWhenSeenBefore() {
+        let done = game("3", .final, at: fixtureNow.addingTimeInterval(-3 * 3600), us: "31", them: "28", won: true)
+        // just launched: an old result isn't announced
+        XCTAssertTrue(Notifier.events([done], lastState: [:], notified: [], sports: ["Football"],
+                                      start: true, final: true, now: fixtureNow).isEmpty)
+        let e = Notifier.events([done], lastState: ["3": .live], notified: [], sports: ["Football"],
+                                start: true, final: true, now: fixtureNow)
+        XCTAssertEqual(e.first?.title, "🏈 Texas State wins 31–28")
+        XCTAssertEqual(e.first?.body, "Final at Boise St · Football")
+        XCTAssertTrue(Notifier.events([done], lastState: ["3": .final], notified: [], sports: ["Football"],
+                                      start: true, final: true, now: fixtureNow).isEmpty)
+    }
+}
+
+final class MenuIconTests: XCTestCase {
+    func image(_ w: Int, _ h: Int, opaque: Bool) -> CGImage {
+        let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
+                            space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        if opaque {
+            ctx.setFillColor(CGColor(red: 1, green: 1, blue: 1, alpha: 1))
+            ctx.fill(CGRect(x: 0, y: 0, width: w, height: h))
+        }
+        ctx.setFillColor(CGColor(red: 0.3, green: 0.05, blue: 0.05, alpha: 1))
+        ctx.fill(CGRect(x: w / 4, y: h / 4, width: w / 2, height: h / 2))
+        return ctx.makeImage()!
+    }
+
+    func alpha(_ cg: CGImage, _ x: Int, _ y: Int) -> UInt8 {
+        var px = [UInt8](repeating: 0, count: 4)
+        let ctx = CGContext(data: &px, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
+                            space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        ctx.draw(cg, in: CGRect(x: -x, y: -y, width: cg.width, height: cg.height))
+        return px[3]
+    }
+
+    func testOpaqueLogoBecomesAShape() throws {
+        let mask = try XCTUnwrap(MenuIcon.templateMask(image(40, 40, opaque: true)))
+        XCTAssertGreaterThan(alpha(mask, 20, 20), 200)   // the dark logo is solid
+        XCTAssertLessThan(alpha(mask, 2, 2), 30)          // the white background is clear
+    }
+
+    func testTransparentLogoIsUsedAsIs() {
+        XCTAssertNil(MenuIcon.templateMask(image(40, 40, opaque: false)))
+    }
+}

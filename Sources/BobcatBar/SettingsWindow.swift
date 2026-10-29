@@ -2,8 +2,9 @@
  * @file    SettingsWindow.swift
  * @author  James Zeman
  * @date    27 OCT 2026
- * @brief   The Settings window: checkboxes for the built-in links and apps, your
- *          own links, the Orgs list, and scores. Every change is saved to
+ * @brief   The Settings window: opening at login, the menu-bar icon, checkboxes
+ *          for the built-in links and apps, your own links, the Orgs list, scores
+ *          and their notifications. Every change is saved to
  *          config.json straight away, re-reading the file first so edits made in
  *          an editor are kept.
  */
@@ -59,6 +60,8 @@ final class SettingsModel: ObservableObject {
     @Published var config: Config
     @Published var error: String?
     @Published var draft: LinkDraft?
+    @Published var loginEnabled = LoginItem.isEnabled
+    @Published var notificationsBlocked = false
     private let onSave: () -> Void
 
     /**
@@ -81,6 +84,89 @@ final class SettingsModel: ObservableObject {
         let r = ConfigStore.load()
         config = r.config
         error = r.error
+        loginEnabled = LoginItem.isEnabled
+        checkNotifications()
+    }
+
+    // MARK: - General
+
+    /**
+     * @brief   The "Open at login" switch, read from macOS each time.
+     */
+    var login: Binding<Bool> {
+        Binding(
+            get: { self.loginEnabled },
+            set: { on in
+                if let e = LoginItem.set(on) { self.error = e }
+                self.loginEnabled = LoginItem.isEnabled
+            })
+    }
+
+    // MARK: - Menu-bar icon
+
+    /**
+     * @brief   The icon picker: supercat, paw or custom.
+     */
+    var icon: Binding<String> {
+        Binding(
+            get: { self.config.icon },
+            set: { choice in
+                if choice == "custom", !FileManager.default.fileExists(atPath: MenuIcon.customURL.path) {
+                    self.chooseIcon()   // nothing imported yet: pick one first
+                } else {
+                    self.apply { $0.icon = choice }
+                }
+            })
+    }
+
+    /**
+     * @brief   Picks an image file and makes it the menu-bar icon.
+     */
+    func chooseIcon() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.image]
+        panel.message = "Choose an image for the menu bar. A simple logo works best; it's shown 18 points tall."
+        panel.prompt = "Use Image"
+        NSApp.activate(ignoringOtherApps: true)
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            try MenuIcon.importImage(from: url)
+            apply { $0.icon = "custom" }
+            onSave()   // the file changed even if config.json didn't
+            objectWillChange.send()
+        } catch let f as ConfigStore.Failure {
+            error = f.message
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+
+    // MARK: - Notifications
+
+    /**
+     * @brief   A switch for notifications about one sport.
+     *
+     * @param   sport   the sport.
+     */
+    func notifies(_ sport: Sport) -> Binding<Bool> {
+        Binding(
+            get: { self.config.notifySports.contains(sport.name) },
+            set: { on in
+                self.apply { c in
+                    c.notifySports.removeAll { $0 == sport.name }
+                    if on { c.notifySports.append(sport.name) }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { self.checkNotifications() }
+            })
+    }
+
+    /**
+     * @brief   Notes whether macOS has notifications turned off for BobcatBar.
+     */
+    func checkNotifications() {
+        Task { @MainActor in
+            notificationsBlocked = !(await Notifier.isAllowed())
+        }
     }
 
     /**
@@ -241,8 +327,142 @@ extension Array {
  */
 struct SettingsView: View {
     @ObservedObject var model: SettingsModel
+    @AppStorage("settingsTab") private var tab = "general"
 
     var body: some View {
+        TabView(selection: $tab) {
+            page {
+                Section("General") {
+                    Toggle("Open BobcatBar when you log in", isOn: model.login)
+                        .disabled(LoginItem.placementProblem != nil && !model.loginEnabled)
+                    if let p = LoginItem.placementProblem {
+                        Text(p).font(.caption).foregroundStyle(.orange)
+                    }
+                }
+
+                Section {
+                    Picker("Menu bar icon", selection: model.icon) {
+                        Text("Supercat").tag("supercat")
+                        Text("Paw print").tag("paw")
+                        Text("Your own…").tag("custom")
+                    }
+                    if model.config.icon == "custom" {
+                        HStack {
+                            Image(nsImage: MenuIcon.image(for: model.config))
+                                .frame(minWidth: 36, minHeight: 22)
+                                .padding(.horizontal, 6)
+                                .background(RoundedRectangle(cornerRadius: 5).fill(.quaternary))
+                            Spacer()
+                            Button("Choose Image…") { model.chooseIcon() }
+                        }
+                        Toggle("Keep its colors", isOn: model.binding(\.iconColor))
+                    }
+                } header: {
+                    Text("Menu Bar")
+                } footer: {
+                    Text(model.config.icon == "custom" && model.config.iconColor
+                         ? "In color, the icon looks the same on light and dark menu bars, so check it on both."
+                         : "Icons follow the menu bar's light or dark look. Your own image stays on your Mac.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Section("About") {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("BobcatBar \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")")
+                            Link(AppDelegate.contactEmail, destination: URL(string: "mailto:\(AppDelegate.contactEmail)")!)
+                                .font(.caption)
+                        }
+                        Spacer()
+                        Button("About BobcatBar") { (NSApp.delegate as? AppDelegate)?.showAbout(nil) }
+                    }
+                }
+            }
+            .tabItem { Label("General", systemImage: "gearshape") }
+            .tag("general")
+
+            page {
+                ForEach(Catalog.Group.allCases, id: \.self) { group in
+                    Section(group.rawValue) {
+                        ForEach(Catalog.items.filter { $0.group == group }) { item in
+                            Toggle(item.name, isOn: model.binding(for: item))
+                        }
+                    }
+                }
+
+            }
+            .tabItem { Label("Campus", systemImage: "building.columns") }
+            .tag("links")
+
+            page {
+                Section {
+                    ForEach(Array(model.myLinks.enumerated()), id: \.offset) { _, entry in
+                        LinkRow(link: entry.link, pinned: entry.list == .pinned,
+                                edit: { model.edit(entry.list, entry.index) },
+                                remove: { model.remove(entry.list, entry.index) })
+                    }
+                    AddRow(title: "Add Link…") { model.newLink() }
+                } header: {
+                    SectionHeader("My Links", "Any site you like. Pin one to keep it at the top of the menu.")
+                }
+
+                Section {
+                    ForEach(Array(model.orgs.enumerated()), id: \.offset) { i, org in
+                        LinkRow(link: org, pinned: false,
+                                edit: { model.edit(.section(Config.orgsName), i) },
+                                remove: { model.remove(.section(Config.orgsName), i) })
+                    }
+                    AddRow(title: "Add Org…") { model.newOrg() }
+                } header: {
+                    SectionHeader("Orgs", "Your student organizations: a GroupMe, Instagram or website link for each.")
+                }
+            }
+            .tabItem { Label("My Links", systemImage: "link") }
+            .tag("mine")
+
+            page {
+                Section {
+                    Toggle("Bobcat Scores (past week and coming week, from ESPN)", isOn: model.binding(\.scores))
+                } header: {
+                    Text("Scores")
+                }
+
+                Section {
+                    ForEach(Sport.all, id: \.self) { sport in
+                        Toggle("\(sport.emoji) \(sport.name)", isOn: model.notifies(sport))
+                    }
+                    Toggle("30 minutes before a game", isOn: model.binding(\.notifyStart))
+                        .disabled(model.config.notifySports.isEmpty)
+                    Toggle("Final scores", isOn: model.binding(\.notifyFinal))
+                        .disabled(model.config.notifySports.isEmpty)
+                    if model.notificationsBlocked, !model.config.notifySports.isEmpty {
+                        HStack {
+                            Text("Notifications are turned off for BobcatBar.")
+                                .font(.caption).foregroundStyle(.orange)
+                            Spacer()
+                            Button("Open Settings…") {
+                                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension")!)
+                            }
+                        }
+                    }
+                } header: {
+                    SectionHeader("Notifications", "Pick the sports you follow. Click a notification to open the game on ESPN.")
+                }
+                .disabled(!model.config.scores)
+            }
+            .tabItem { Label("Scores", systemImage: "sportscourt") }
+            .tag("scores")
+        }
+        .frame(width: 480, height: 600)
+        .sheet(item: $model.draft) { _ in
+            LinkSheet(model: model)
+        }
+        .onAppear { model.checkNotifications() }
+    }
+
+    /**
+     * @brief   One tab: the config error (if any), its sections, and the config.json footer.
+     */
+    private func page<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         Form {
             if let err = model.error {
                 Section {
@@ -263,52 +483,12 @@ struct SettingsView: View {
                 }
             }
 
-            Group {
-                ForEach(Catalog.Group.allCases, id: \.self) { group in
-                    Section(group.rawValue) {
-                        ForEach(Catalog.items.filter { $0.group == group }) { item in
-                            Toggle(item.name, isOn: model.binding(for: item))
-                        }
-                    }
-                }
-
-                Section {
-                    ForEach(Array(model.myLinks.enumerated()), id: \.offset) { _, entry in
-                        LinkRow(link: entry.link, pinned: entry.list == .pinned,
-                                edit: { model.edit(entry.list, entry.index) },
-                                remove: { model.remove(entry.list, entry.index) })
-                    }
-                    AddRow(title: "Add Link…") { model.newLink() }
-                } header: {
-                    Text("My Links")
-                } footer: {
-                    Text("Any site you like. Pin one to keep it at the top of the menu.")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-
-                Section {
-                    ForEach(Array(model.orgs.enumerated()), id: \.offset) { i, org in
-                        LinkRow(link: org, pinned: false,
-                                edit: { model.edit(.section(Config.orgsName), i) },
-                                remove: { model.remove(.section(Config.orgsName), i) })
-                    }
-                    AddRow(title: "Add Org…") { model.newOrg() }
-                } header: {
-                    Text("Orgs")
-                } footer: {
-                    Text("Your student organizations: a GroupMe, Instagram or website link for each.")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-
-                Section("Scores") {
-                    Toggle("Bobcat Scores (past week and coming week, from ESPN)", isOn: model.binding(\.scores))
-                }
-            }
-            .disabled(model.error != nil)
+            Group { content() }
+                .disabled(model.error != nil)
 
             Section {
                 HStack {
-                    Text("Everything here is saved in config.json, along with anything you add by hand.")
+                    Text("Saved in config.json, along with anything you add by hand.")
                         .font(.caption).foregroundStyle(.secondary)
                     Spacer()
                     Button("Edit config.json…") { NSWorkspace.shared.open(ConfigStore.fileURL) }
@@ -316,10 +496,6 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 460, height: 640)
-        .sheet(item: $model.draft) { _ in
-            LinkSheet(model: model)
-        }
     }
 }
 
@@ -360,10 +536,33 @@ struct AddRow: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            Label(title, systemImage: "plus.circle.fill")
+        HStack {
+            Button(action: action) {
+                Label(title, systemImage: "plus.circle.fill")
+            }
+            .buttonStyle(.borderless)
+            Spacer()
         }
-        .buttonStyle(.borderless)
+    }
+}
+
+/**
+ * @brief   A section heading with a line of explanation under it.
+ */
+struct SectionHeader: View {
+    let title: String
+    let detail: String
+
+    init(_ title: String, _ detail: String) {
+        self.title = title
+        self.detail = detail
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+            Text(detail).font(.caption).fontWeight(.regular).foregroundStyle(.secondary)
+        }
     }
 }
 

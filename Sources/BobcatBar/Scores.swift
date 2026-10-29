@@ -86,7 +86,8 @@ final class Scores {
     private(set) var updated: Date?
     private var fetching = false
     private var timer: Timer?
-    var onChange: () -> Void = {}
+    var onChange: () -> Void = {}   // after every fetch
+    var onTick: () -> Void = {}     // once a minute while running
 
     /**
      * @brief   Starts fetching, now and on the refresh timer.
@@ -94,7 +95,10 @@ final class Scores {
     func start() {
         refresh(ifOlderThan: 0)
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.refresh(ifOlderThan: self?.isLive == true ? 55 : 15 * 60) }
+            MainActor.assumeIsolated {
+                self?.refresh(ifOlderThan: self?.isLive == true ? 55 : 15 * 60)
+                self?.onTick()
+            }
         }
     }
 
@@ -109,6 +113,11 @@ final class Scores {
     }
 
     var isRunning: Bool { timer != nil }
+
+    /**
+     * @brief   Every sport's games.
+     */
+    var all: [Game] { Array(games.values.joined()) }
 
     /**
      * @brief   Whether any game is in progress.
@@ -145,17 +154,17 @@ final class Scores {
      * @brief   The game for the menu line: a live one, else the latest result from
      *          the last two weeks, else the next game.
      */
-    var headline: Game? { Self.headline(Array(games.values.joined()), now: Date()) }
+    var headline: Game? { Self.headline(all, now: Date()) }
 
     /**
      * @brief   Live games, then every result from the past week in any sport, newest first.
      */
-    var pastWeek: [Game] { Self.pastWeek(Array(games.values.joined()), now: Date()) }
+    var pastWeek: [Game] { Self.pastWeek(all, now: Date()) }
 
     /**
      * @brief   Games in the coming week in any sport, soonest first.
      */
-    var comingWeek: [Game] { Self.comingWeek(Array(games.values.joined()), now: Date()) }
+    var comingWeek: [Game] { Self.comingWeek(all, now: Date()) }
 
     nonisolated static func headline(_ all: [Game], now: Date) -> Game? {
         if let live = all.filter({ $0.state == .live }).max(by: { $0.date < $1.date }) { return live }

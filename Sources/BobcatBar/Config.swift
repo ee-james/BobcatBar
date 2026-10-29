@@ -18,6 +18,11 @@ struct Config: Codable {
     var sections: [Section] = []   // e.g. Orgs; shown between links and apps
     var sortLinks: Bool = true
     var scores: Bool = true        // the Bobcat Scores menu item (ESPN data)
+    var notifySports: [String] = []   // sports to send notifications for (Sport.name); none = off
+    var notifyStart: Bool = true   // ...30 minutes before a game
+    var notifyFinal: Bool = true   // ...when a game ends
+    var icon: String = "supercat"  // menu-bar icon: "supercat", "paw" or "custom" (menubar-icon.png)
+    var iconColor: Bool = false    // show a custom icon in its own colors instead of as a template
 
     /**
      * @brief   A link: name, URL and an optional browser.
@@ -69,6 +74,11 @@ extension Config {
         sections = try c.decodeIfPresent([Section].self, forKey: .sections) ?? []
         sortLinks = try c.decodeIfPresent(Bool.self, forKey: .sortLinks) ?? true
         scores = try c.decodeIfPresent(Bool.self, forKey: .scores) ?? true
+        notifySports = try c.decodeIfPresent([String].self, forKey: .notifySports) ?? []
+        notifyStart = try c.decodeIfPresent(Bool.self, forKey: .notifyStart) ?? true
+        notifyFinal = try c.decodeIfPresent(Bool.self, forKey: .notifyFinal) ?? true
+        icon = try c.decodeIfPresent(String.self, forKey: .icon) ?? "supercat"
+        iconColor = try c.decodeIfPresent(Bool.self, forKey: .iconColor) ?? false
     }
 }
 
@@ -110,6 +120,11 @@ enum ConfigStore {
     static var backupURL: URL { dir.appendingPathComponent("config.json.bak") }
 
     /**
+     * @brief   Set when this launch wrote the starter config (a new install).
+     */
+    nonisolated(unsafe) static var isFirstRun = false
+
+    /**
      * @brief   Why config.json can't be used; the message is shown in the menu and Settings.
      */
     struct Failure: Error, Equatable {
@@ -140,6 +155,7 @@ enum ConfigStore {
         }
         if !FileManager.default.fileExists(atPath: fileURL.path) {
             writeStarter()
+            isFirstRun = true
             return .success(.starter)
         }
         do {
