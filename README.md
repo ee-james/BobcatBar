@@ -4,14 +4,26 @@ A menu-bar launcher for Texas State students: Canvas, CatsWeb, Navigate 360 and 
 
 ## Install
 
-Needs macOS 14 or later and the Swift toolchain (Xcode or the command-line tools).
+Needs macOS 14 or later, on an Apple silicon or Intel Mac.
+
+1. Download **BobcatBar-x.y.z.zip** from the [latest release](https://github.com/ee-james/BobcatBar/releases/latest).
+2. Double-click the zip, then drag **BobcatBar** into your Applications folder.
+3. Open it. The Supercat appears in the menu bar; there's no Dock icon.
+
+To have it start when you log in, add it in System Settings → General → Login Items.
+
+The app is signed and notarized by Apple, so it opens without security warnings.
+
+### Building it yourself
+
+Needs the Swift toolchain (Xcode or the command-line tools).
 
 ```sh
 ./build.sh --install      # builds BobcatBar.app and copies it to ~/Applications
 open ~/Applications/BobcatBar.app
 ```
 
-To install somewhere else, put `INSTALL_DIR="/path/to/folder"` in a `build.local` file next to `build.sh` (git ignores it).
+To install somewhere else, put `INSTALL_DIR="/path/to/folder"` in a `build.local` file next to `build.sh` (git ignores it). `./build.sh --release` makes the signed, notarized zip for a release (it needs a Developer ID certificate).
 
 ## Settings
 
