@@ -19,6 +19,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var configStamp = ""
     private let scores = Scores()
     private let notifier = Notifier()
+    let updater = Updater()
 
     /**
      * @brief   Creates the menu-bar item and loads the config.
@@ -43,6 +44,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             guard let self else { return }
             notifier.check(scores.all)
         }
+        updater.start()
         CatalogUpdater.loadCached()
         reload(nil)
         refreshCatalog()
@@ -226,6 +228,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let about = NSMenuItem(title: "About BobcatBar", action: #selector(showAbout), keyEquivalent: "")
         about.target = self
         menu.addItem(about)
+        if updater.isAvailable {
+            let check = NSMenuItem(title: "Check for Updates…", action: #selector(Updater.checkForUpdates(_:)), keyEquivalent: "")
+            check.target = updater
+            menu.addItem(check)
+        }
         let settings = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)

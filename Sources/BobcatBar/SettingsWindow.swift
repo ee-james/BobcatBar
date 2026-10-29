@@ -366,9 +366,18 @@ struct SettingsView: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Section {
-                    Toggle("Get campus link fixes from GitHub daily", isOn: model.binding(\.updateCatalog))
+                    if let u = (NSApp.delegate as? AppDelegate)?.updater, u.isAvailable {
+                        Toggle("Check for new versions daily", isOn: Binding(
+                            get: { u.checksAutomatically },
+                            set: { u.checksAutomatically = $0; model.objectWillChange.send() }))
+                        Toggle("Install them automatically", isOn: Binding(
+                            get: { u.installsAutomatically },
+                            set: { u.installsAutomatically = $0; model.objectWillChange.send() }))
+                            .disabled(!u.checksAutomatically)
+                    }
+                    Toggle("Get campus link fixes daily", isOn: model.binding(\.updateCatalog))
                 } header: {
-                    SectionHeader("Updates", "Downloads the shared link list (catalog.json); nothing about you is sent.")
+                    SectionHeader("Updates", "Both come from the BobcatBar page on GitHub. Nothing about you is sent.")
                 }
 
                 Section("About") {

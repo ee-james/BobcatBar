@@ -15,6 +15,8 @@
 ##                          "Developer ID Application" certificate in the keychain and a
 ##                          notarytool profile (NOTARY_PROFILE, default "notary"), made once with
 ##                          xcrun notarytool store-credentials notary --apple-id <id> --team-id <team>
+##                          It also writes appcast.xml (the update feed), signed with the Sparkle
+##                          key in the login keychain (generate_keys --account bobcatbar).
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -25,6 +27,8 @@ CONFIG=release
 INSTALL_DIR="$HOME/Applications"
 [[ -f build.local ]] && source build.local
 NOTARY_PROFILE="notary"
+FEED_URL="https://raw.githubusercontent.com/ee-james/BobcatBar/main/appcast.xml"
+SPARKLE_PUBLIC_KEY="nzCQkwl8yQAOZdnMaxs6+IEfGH5Lhf8TkBzudCFK4WI="   # private half: login keychain, account "bobcatbar"
 INSTALL=0
 RELEASE=0
 for arg in "$@"; do
@@ -56,6 +60,15 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
 cp "$BIN" "$APP/Contents/MacOS/$APP_NAME"
+
+# Sparkle (updates). ditto keeps the framework's symlinks, which notarization checks.
+# The XPC services are only for sandboxed apps, and headers aren't needed at run time.
+mkdir -p "$APP/Contents/Frameworks"
+ditto "$(dirname "$BIN")/Sparkle.framework" "$APP/Contents/Frameworks/Sparkle.framework"
+SPK="$APP/Contents/Frameworks/Sparkle.framework"
+rm -rf "$SPK/Versions/B/XPCServices" "$SPK/XPCServices" \
+       "$SPK/Versions/B/Headers" "$SPK/Headers" "$SPK/Versions/B/PrivateHeaders" "$SPK/PrivateHeaders" \
+       "$SPK/Versions/B/Modules" "$SPK/Modules"
 cp icon/BobcatTemplate.png     "$APP/Contents/Resources/"
 cp icon/BobcatTemplate@2x.png  "$APP/Contents/Resources/"
 
@@ -65,6 +78,15 @@ xcrun actool "$PWD/icon/AppIcon.icon" --compile "$PWD/$APP/Contents/Resources" -
   --output-partial-info-plist "$PWD/build/icon-partial.plist" >/dev/null   # actool needs absolute paths
 
 BUILD_NUMBER="$(git rev-list --count HEAD 2>/dev/null || echo 1)"   # only goes up; Sparkle compares it
+
+# Only release builds get the update feed: a local --install build shouldn't replace itself.
+SPARKLE_KEYS=""
+if (( RELEASE )); then
+  SPARKLE_KEYS="  <key>SUFeedURL</key>               <string>$FEED_URL</string>
+  <key>SUPublicEDKey</key>           <string>$SPARKLE_PUBLIC_KEY</string>
+  <key>SUEnableAutomaticChecks</key> <true/>
+  <key>SUEnableSystemProfiling</key> <false/>"
+fi
 
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -83,18 +105,24 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>LSMinimumSystemVersion</key>  <string>14.0</string>
   <key>LSUIElement</key>             <true/>
   <key>NSHumanReadableCopyright</key> <string>© 2026 James Zeman. MIT License.</string>
+$SPARKLE_KEYS
 </dict>
 </plist>
 PLIST
 
+# sign from the inside out (no --deep): Sparkle's helpers, the framework, then the app
 if (( RELEASE )); then
   echo "▸ codesign ($IDENTITY)"
-  codesign --force --options runtime --timestamp --sign "$IDENTITY" "$APP"
+  SIGN=(--force --options runtime --timestamp --sign "$IDENTITY")
 else
   echo "▸ codesign (ad-hoc)"
-  codesign --force --sign - --timestamp=none "$APP"
+  SIGN=(--force --sign - --timestamp=none)
 fi
-codesign --verify --verbose=1 "$APP"
+codesign "${SIGN[@]}" "$SPK/Versions/B/Autoupdate"
+codesign "${SIGN[@]}" "$SPK/Versions/B/Updater.app"
+codesign "${SIGN[@]}" "$SPK"
+codesign "${SIGN[@]}" "$APP"
+codesign --verify --deep --strict --verbose=1 "$APP"
 
 echo "▸ built $APP"
 
@@ -108,7 +136,31 @@ if (( RELEASE )); then
   rm -f "$ZIP"
   ditto -c -k --keepParent "$APP" "$ZIP"   # again, with the ticket stapled
   spctl --assess --type execute --verbose "$APP"
-  echo "▸ $ZIP is ready: gh release create v$VERSION $ZIP"
+
+  # appcast.xml: the feed installed copies check. Sparkle verifies the zip against
+  # this signature, made with the private key in the login keychain.
+  SIG="$(.build/artifacts/sparkle/Sparkle/bin/sign_update --account bobcatbar "$ZIP")"
+  cat > appcast.xml <<XML
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>BobcatBar</title>
+    <link>https://github.com/ee-james/BobcatBar</link>
+    <item>
+      <title>BobcatBar $VERSION</title>
+      <pubDate>$(LC_ALL=C date -u "+%a, %d %b %Y %H:%M:%S +0000")</pubDate>
+      <sparkle:version>$BUILD_NUMBER</sparkle:version>
+      <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>https://github.com/ee-james/BobcatBar/releases/tag/v$VERSION</sparkle:fullReleaseNotesLink>
+      <enclosure url="https://github.com/ee-james/BobcatBar/releases/download/v$VERSION/$APP_NAME-$VERSION.zip"
+                 type="application/octet-stream" $SIG />
+    </item>
+  </channel>
+</rss>
+XML
+  echo "▸ $ZIP and appcast.xml are ready. Publish the release first, then push appcast.xml:"
+  echo "    gh release create v$VERSION $ZIP && git add appcast.xml && git commit -m 'appcast: $VERSION' && git push"
 fi
 
 if (( INSTALL )); then
