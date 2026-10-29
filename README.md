@@ -1,6 +1,8 @@
 # BobcatBar
 
-A menu-bar launcher for Texas State students: Canvas, CatsWeb, Navigate 360 and the other campus sites one click away, plus your student orgs and the apps you use for class.
+A menu-bar launcher for Texas State students: Canvas, CatsWeb, Navigate 360 and the other campus sites one click away, plus your own links, your student orgs, the apps you use for class, and Bobcat scores.
+
+Questions, ideas or bugs: **bobcatbar@zetsystems.com**, or [open an issue](https://github.com/ee-james/BobcatBar/issues).
 
 ## Install
 
@@ -8,38 +10,55 @@ Needs macOS 14 or later, on an Apple silicon or Intel Mac.
 
 1. Download **BobcatBar-x.y.z.zip** from the [latest release](https://github.com/ee-james/BobcatBar/releases/latest).
 2. Double-click the zip, then drag **BobcatBar** into your Applications folder.
-3. Open it. The Supercat appears in the menu bar; there's no Dock icon.
+3. Open it from Applications. The Supercat appears in the menu bar; there's no Dock icon.
 
-To have it start when you log in, add it in System Settings → General → Login Items.
+It's signed and notarized by Apple, so it opens without security warnings. A new install opens itself at login (turn that off in Settings → General) and keeps itself up to date.
 
-The app is signed and notarized by Apple, so it opens without security warnings.
-
-### Building it yourself
-
-Needs the Swift toolchain (Xcode or the command-line tools).
-
-```sh
-./build.sh --install      # builds BobcatBar.app and copies it to ~/Applications
-open ~/Applications/BobcatBar.app
-```
-
-To install somewhere else, put `INSTALL_DIR="/path/to/folder"` in a `build.local` file next to `build.sh` (git ignores it). `./build.sh --release` makes the signed, notarized zip for a release (it needs a Developer ID certificate).
+**Have 0.1.0?** It can't update itself. Download the latest release once and replace it; from then on updates are automatic.
 
 ## Settings
 
-Choose **Settings…** (⌘,) from the menu:
+Choose **Settings…** (⌘,) from the menu.
 
-- **Checkboxes** turn the built-in campus links and apps on or off.
-- **Bobcat Scores** (on by default) shows the latest Texas State result in the menu, e.g. `Bobcat Scores: 🏈 W 20–17 vs Utah State`. Hover it for every result from the past week in football, basketball, volleyball and baseball, live games first, plus the coming week's games. Click a game to open it on ESPN.
-- **Orgs** holds your student organizations, each with a link (GroupMe, Instagram, a website). They appear under an "Orgs" heading in the menu.
-- **Edit config.json…** opens the file itself (`~/.config/bobcatbar/config.json`) for anything else: your own links, sections with their own headings, a specific browser for a link (`"browser": "Google Chrome"`), or `"sortLinks": false` to keep your order. The menu picks up edits the next time it opens.
+- **General:** open at login; the menu-bar icon (the Supercat, a paw print, or your own image); updates; About.
+- **Campus:** checkboxes for the built-in Texas State links and apps.
+- **My Links:** add any site (pin it to keep it at the top) and your student orgs (a GroupMe, Instagram or website link each).
+- **Scores:** Bobcat Scores in the menu, and notifications for the sports you follow.
 
-A new install starts with Canvas, CatsWeb and Navigate 360 pinned at the top, plus Campus Map, Degree Audit, Financial Aid, Registration and Student Balance.
+Everything is saved in `~/.config/bobcatbar/config.json`, which you can also edit by hand (**Edit config.json…**): sections with their own headings, a specific browser for a link (`"browser": "Google Chrome"`), or `"sortLinks": false` to keep your order. The menu picks up edits the next time it opens. If the file has a mistake, BobcatBar says so and won't save over it, and every save keeps the previous version as `config.json.bak`.
+
+### Your own menu-bar icon
+
+Settings → General → Menu bar icon → **Your own…** takes any image. A logo with a transparent background works best; it follows the menu bar's light or dark look. An image on a solid background is turned into a shape from its dark parts, or switch on **Keep its colors** to show it as is. The image is copied to `~/.config/bobcatbar/` and never leaves your Mac.
 
 ## Scores
 
-Scores come from ESPN's public schedule data (`site.api.espn.com`), fetched straight from your Mac: every 15 minutes, every minute while a game is live, and when you open the menu with data more than two minutes old. Nothing about you is sent. It's an unofficial feed, so if ESPN changes it the scores line may go quiet until BobcatBar is updated. Turn it off in Settings, or with `"scores": false` in config.json.
+The menu shows the latest Texas State result, e.g. `Bobcat Scores: 🏈 W 20–17 vs Utah State`. Hover it for every result from the past week in football, basketball, volleyball and baseball, live games first, plus the coming week's games. Click a game to open it on ESPN.
+
+**Notifications** (Settings → Scores) tell you 30 minutes before a game and give the final score, for the sports you pick. Click one to open the game.
+
+Scores come from ESPN's public schedule data (`site.api.espn.com`): every 15 minutes, every minute while a game is live, and when you open the menu with data more than two minutes old. It's an unofficial feed, so if ESPN changes it the scores line may go quiet until BobcatBar is updated. Turn it off in Settings.
+
+## What BobcatBar connects to
+
+- **ESPN** for scores, if Bobcat Scores is on.
+- **GitHub**, once a day, for new versions (`appcast.xml`) and campus link fixes (`catalog.json`). Both can be turned off in Settings → General.
+
+These are plain downloads. BobcatBar doesn't send anything about you, your links or your settings, and has no analytics.
+
+## Contributing
+
+**Fix or add a campus link:** edit [`catalog.json`](catalog.json) and send a pull request. Once it's merged, every copy of BobcatBar picks it up within a day, with no new release needed. Keep the `id` the same when you change a link's address or name, so people's existing checkboxes follow it. Also update `Catalog.builtIn` in `Sources/BobcatBar/Catalog.swift` to match (the tests check they're the same).
+
+**Code:** needs Xcode or the Swift command-line tools.
+
+```sh
+swift test                # run the tests
+./build.sh --install      # build BobcatBar.app and copy it to ~/Applications (INSTALL_DIR in build.local to change)
+```
+
+Builds made this way don't update themselves. `./build.sh --release` makes a signed, notarized release zip and `appcast.xml`; it needs the maintainer's Developer ID certificate and update-signing key.
 
 ## License
 
-MIT. See [LICENSE](LICENSE). The Supercat icon is a Texas State University trademark; it isn't covered by the license.
+MIT. See [LICENSE](LICENSE). Not affiliated with Texas State University. The Supercat is a Texas State University trademark and isn't covered by the license.
