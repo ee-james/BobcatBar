@@ -85,6 +85,47 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         SettingsWindow.show(config: config, error: configError) { [weak self] in self?.reload(nil) }
     }
 
+    /**
+     * @brief   Shows the About panel: version, contact email, the project page, and
+     *          where scores come from.
+     *
+     * @param   sender  the menu item.
+     */
+    @objc func showAbout(_ sender: Any?) {
+        NSApp.activate(ignoringOtherApps: true)   // a menu-bar app isn't frontmost otherwise
+        NSApp.orderFrontStandardAboutPanel(options: [.credits: Self.aboutCredits()])
+    }
+
+    /**
+     * @brief   The About panel's credits text.
+     */
+    static func aboutCredits() -> NSAttributedString {
+        let center = NSMutableParagraphStyle()
+        center.alignment = .center
+        center.paragraphSpacing = 6
+        let body: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize),
+            .foregroundColor: NSColor.labelColor, .paragraphStyle: center]
+        let note: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize - 1),
+            .foregroundColor: NSColor.secondaryLabelColor, .paragraphStyle: center]
+
+        let s = NSMutableAttributedString(string: "A menu-bar launcher for Texas State students.\n", attributes: body)
+        s.append(NSAttributedString(string: "Questions, ideas or bugs: ", attributes: body))
+        var mail = body
+        mail[.link] = URL(string: "mailto:\(contactEmail)")!
+        s.append(NSAttributedString(string: contactEmail + "\n", attributes: mail))
+        var site = body
+        site[.link] = URL(string: projectURL)!
+        s.append(NSAttributedString(string: "github.com/ee-james/BobcatBar\n", attributes: site))
+        s.append(NSAttributedString(string: "Scores from ESPN. Not affiliated with Texas State University; "
+                                    + "the Supercat is a Texas State trademark.", attributes: note))
+        return s
+    }
+
+    static let contactEmail = "bobcatbar@zetsystems.com"
+    static let projectURL = "https://github.com/ee-james/BobcatBar"
+
     // MARK: - NSMenuDelegate
 
     /**
@@ -154,6 +195,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             menu.addItem(.separator())
         }
 
+        let about = NSMenuItem(title: "About BobcatBar", action: #selector(showAbout), keyEquivalent: "")
+        about.target = self
+        menu.addItem(about)
         let settings = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)

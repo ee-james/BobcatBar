@@ -59,6 +59,13 @@ cp "$BIN" "$APP/Contents/MacOS/$APP_NAME"
 cp icon/BobcatTemplate.png     "$APP/Contents/Resources/"
 cp icon/BobcatTemplate@2x.png  "$APP/Contents/Resources/"
 
+# app icon (Finder, About): the Icon Composer file compiles to Assets.car plus an .icns for older macOS
+xcrun actool "$PWD/icon/AppIcon.icon" --compile "$PWD/$APP/Contents/Resources" --app-icon AppIcon \
+  --platform macosx --minimum-deployment-target 14.0 --target-device mac \
+  --output-partial-info-plist "$PWD/build/icon-partial.plist" >/dev/null   # actool needs absolute paths
+
+BUILD_NUMBER="$(git rev-list --count HEAD 2>/dev/null || echo 1)"   # only goes up; Sparkle compares it
+
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -70,10 +77,12 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleExecutable</key>      <string>$APP_NAME</string>
   <key>CFBundlePackageType</key>     <string>APPL</string>
   <key>CFBundleShortVersionString</key> <string>$VERSION</string>
-  <key>CFBundleVersion</key>         <string>$VERSION</string>
+  <key>CFBundleVersion</key>         <string>$BUILD_NUMBER</string>
+  <key>CFBundleIconFile</key>        <string>AppIcon</string>
+  <key>CFBundleIconName</key>        <string>AppIcon</string>
   <key>LSMinimumSystemVersion</key>  <string>14.0</string>
   <key>LSUIElement</key>             <true/>
-  <key>NSHumanReadableCopyright</key> <string>James Zeman</string>
+  <key>NSHumanReadableCopyright</key> <string>© 2026 James Zeman. MIT License.</string>
 </dict>
 </plist>
 PLIST

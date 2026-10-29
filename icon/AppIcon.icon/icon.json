@@ -1,0 +1,28 @@
+{
+  "fill": {
+    "automatic-gradient": "extended-srgb:0.31373,0.07059,0.07843,1.00000"
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "image-name": "supercat.png",
+          "name": "supercat"
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.3
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": [
+      "macOS"
+    ]
+  }
+}
