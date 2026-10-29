@@ -23,6 +23,7 @@ struct Sport: Hashable {
         .init(name: "Women's Basketball", emoji: "🏀", league: "basketball/womens-college-basketball", teamID: "326"),
         .init(name: "Volleyball", emoji: "🏐", league: "volleyball/womens-college-volleyball", teamID: "326"),
         .init(name: "Baseball", emoji: "⚾️", league: "baseball/college-baseball", teamID: "147"),
+        .init(name: "Softball", emoji: "🥎", league: "softball/college-softball", teamID: "326"),
     ]
 }
 
