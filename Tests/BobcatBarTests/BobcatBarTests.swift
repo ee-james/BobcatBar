@@ -310,10 +310,32 @@ final class CatalogUpdaterTests: XCTestCase {
         XCTAssertNil(CatalogUpdater.validate(json([["id": "a", "name": "A", "target": "http://a.txst.edu", "group": "links"]])))
         XCTAssertNil(CatalogUpdater.validate(json([["id": "a", "name": "A", "target": "javascript:alert(1)", "group": "links"]])))
         XCTAssertNil(CatalogUpdater.validate(json([["id": "a", "name": "A", "target": "/Applications/Evil.app/x", "group": "apps"]])))
-        XCTAssertNil(CatalogUpdater.validate(json([["id": "a", "name": "A", "target": "https://a.edu", "group": "links"],
-                                                   ["id": "a", "name": "B", "target": "https://b.edu", "group": "links"]])))
+        XCTAssertNil(CatalogUpdater.validate(json([["id": "a", "name": "A", "target": "https://a.txst.edu", "group": "links"],
+                                                   ["id": "a", "name": "B", "target": "https://b.txst.edu", "group": "links"]])))
         XCTAssertNil(CatalogUpdater.validate(json([])))
         XCTAssertNil(CatalogUpdater.validate(Data("<html>".utf8)))
+    }
+
+    func testOnlyAllowedPlaces() {
+        func ok(_ target: String, _ group: String = "links", browser: String? = nil) -> Bool {
+            var item = ["id": "a", "name": "A", "target": target, "group": group]
+            item["browser"] = browser
+            return CatalogUpdater.validate(json([item])) != nil
+        }
+        XCTAssertTrue(ok("https://txst.edu"))
+        XCTAssertTrue(ok("https://www.registrar.TXST.edu/x"))
+        XCTAssertTrue(ok("https://dw-prod.ec.txstate.edu/y"))
+        XCTAssertTrue(ok("https://txstate.instructure.com", "pinned"))
+        XCTAssertTrue(ok("https://maps.txst.edu", browser: "Safari"))
+        XCTAssertTrue(ok("chrome", "apps"))
+        XCTAssertFalse(ok("https://www.pornhub.com"))
+        XCTAssertFalse(ok("https://evil.com/txst.edu"))
+        XCTAssertFalse(ok("https://txst.edu.evil.com"))
+        XCTAssertFalse(ok("https://eviltxst.edu"))
+        XCTAssertFalse(ok("https://other.instructure.com"))       // only Texas State's Canvas
+        XCTAssertFalse(ok("https://maps.txst.edu:8443"))
+        XCTAssertFalse(ok("https://maps.txst.edu", browser: "Terminal"))
+        XCTAssertFalse(ok("Terminal", "apps"))
     }
 
     func testMovedLinkFollowsInConfig() {

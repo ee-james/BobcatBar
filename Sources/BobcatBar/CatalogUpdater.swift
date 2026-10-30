@@ -3,7 +3,8 @@
  * @author  James Zeman
  * @date    28 OCT 2026
  * @brief   Keeps the campus links current from catalog.json in the GitHub repo, so
- *          a dead link can be fixed with a one-line pull request instead of a new
+ *          a dead link can be fixed without a new release. Only addresses on the
+ *          built-in allowlist below are accepted; anything else needs a signed
  *          release. Checked once a day; the last good copy is cached. When a link's
  *          address changes, the copy in config.json is updated too, since ticking a
  *          checkbox copies the address there.
@@ -21,6 +22,26 @@ struct CatalogFile: Codable {
 enum CatalogUpdater {
     static let remoteURL = URL(string: "https://raw.githubusercontent.com/ee-james/BobcatBar/main/catalog.json")!
     static let maxAge: TimeInterval = 24 * 3600
+
+    /**
+     * @brief   The only places a downloaded catalog may point. These are compiled in,
+     *          so changing them takes a signed release, not just an edit to catalog.json.
+     *          A domain also allows its subdomains; a host allows only itself.
+     */
+    static let allowedDomains: Set<String> = ["txst.edu", "txstate.edu"]
+    static let allowedHosts: Set<String> = ["txstate.instructure.com", "txst.navigate.eab.com", "app.genio.co"]
+    static let allowedApps: Set<String> = ["md.obsidian", "chrome"]
+    static let allowedBrowsers: Set<String> = ["Safari", "com.apple.Safari", "Google Chrome", "com.google.Chrome",
+                                               "Firefox", "org.mozilla.firefox", "Microsoft Edge", "com.microsoft.edgemac",
+                                               "Arc", "company.thebrowser.Browser", "Brave Browser", "com.brave.Browser"]
+
+    /**
+     * @brief   Whether a link's host is on the allowlist.
+     */
+    static func isAllowed(host: String) -> Bool {
+        let h = host.lowercased()
+        return allowedHosts.contains(h) || allowedDomains.contains { h == $0 || h.hasSuffix("." + $0) }
+    }
 
     /**
      * @brief   The cached copy, ~/Library/Caches/com.zetsystems.bobcatbar/catalog.json.
@@ -78,7 +99,8 @@ enum CatalogUpdater {
 
     /**
      * @brief   Checks a downloaded catalog. Anything odd rejects the whole file: links
-     *          must be https web addresses, apps plain names or bundle ids.
+     *          must be https addresses on an allowed host, apps and browsers must be on
+     *          their allowlists.
      *
      * @param   data    the file.
      * @return  its items, or nil.
@@ -91,13 +113,14 @@ enum CatalogUpdater {
         for item in file.items {
             let name = item.name.trimmingCharacters(in: .whitespaces)
             guard !item.id.isEmpty, !name.isEmpty, name.count <= 60 else { return nil }
-            if let b = item.browser, b.wholeMatch(of: appName) == nil { return nil }
+            if let b = item.browser, b.wholeMatch(of: appName) == nil || !allowedBrowsers.contains(b) { return nil }
             switch item.group {
             case .apps:
-                guard item.target.wholeMatch(of: appName) != nil else { return nil }
+                guard item.target.wholeMatch(of: appName) != nil, allowedApps.contains(item.target) else { return nil }
             case .pinned, .links:
                 guard let u = URLComponents(string: item.target), u.scheme == "https",
-                      let host = u.host, host.contains("."), u.user == nil, u.password == nil else { return nil }
+                      let host = u.host, host.contains("."), u.user == nil, u.password == nil, u.port == nil,
+                      isAllowed(host: host) else { return nil }
             }
         }
         return file.items

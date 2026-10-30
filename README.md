@@ -48,7 +48,7 @@ These are plain downloads. BobcatBar doesn't send anything about you, your links
 
 ## Contributing
 
-**Fix or add a campus link:** edit [`catalog.json`](catalog.json) and send a pull request. Once it's merged, every copy of BobcatBar picks it up within a day, with no new release needed. Keep the `id` the same when you change a link's address or name, so people's existing checkboxes follow it. Also update `Catalog.builtIn` in `Sources/BobcatBar/Catalog.swift` to match (the tests check they're the same).
+**Report a broken or missing campus link:** open an issue. Link changes are reviewed and approved by the maintainer, and BobcatBar only accepts addresses on Texas State sites and a few approved services built into the app.
 
 **Code:** needs Xcode or the Swift command-line tools.
 

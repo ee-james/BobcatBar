@@ -5,7 +5,7 @@
  * @brief   The Texas State links and apps that Settings offers as checkboxes,
  *          and how they're matched against config.json. The list is built in and
  *          also kept in the repo as catalog.json, which BobcatBar checks daily so a
- *          dead link can be fixed without a new release (CatalogUpdater).
+ *          dead link on an allowed host can be fixed without a new release (CatalogUpdater).
  */
 import Foundation
 
