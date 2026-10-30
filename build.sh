@@ -22,7 +22,7 @@ cd "$(dirname "$0")"
 
 APP_NAME="BobcatBar"
 BUNDLE_ID="com.zetsystems.bobcatbar"
-VERSION="0.2.0"
+VERSION="0.2.1"
 CONFIG=release
 INSTALL_DIR="$HOME/Applications"
 [[ -f build.local ]] && source build.local
