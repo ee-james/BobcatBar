@@ -4,14 +4,14 @@
     <title>BobcatBar</title>
     <link>https://github.com/ee-james/BobcatBar</link>
     <item>
-      <title>BobcatBar 0.2.0</title>
-      <pubDate>Thu, 29 Oct 2026 02:52:24 +0000</pubDate>
-      <sparkle:version>15</sparkle:version>
-      <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
+      <title>BobcatBar 0.2.1</title>
+      <pubDate>Fri, 30 Oct 2026 03:01:36 +0000</pubDate>
+      <sparkle:version>20</sparkle:version>
+      <sparkle:shortVersionString>0.2.1</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <sparkle:fullReleaseNotesLink>https://github.com/ee-james/BobcatBar/releases/tag/v0.2.0</sparkle:fullReleaseNotesLink>
-      <enclosure url="https://github.com/ee-james/BobcatBar/releases/download/v0.2.0/BobcatBar-0.2.0.zip"
-                 type="application/octet-stream" sparkle:edSignature="0o3HBU/tv0mrY+mnAN/dQEDXZfKlTTWNS0v7x4Y84Ri0owe2zLMo2U0khtM2dQD36SwwNViLZEaouf+NRtXeBQ==" length="3396254" />
+      <sparkle:fullReleaseNotesLink>https://github.com/ee-james/BobcatBar/releases/tag/v0.2.1</sparkle:fullReleaseNotesLink>
+      <enclosure url="https://github.com/ee-james/BobcatBar/releases/download/v0.2.1/BobcatBar-0.2.1.zip"
+                 type="application/octet-stream" sparkle:edSignature="ZGi4BbuWWH+KVdrrbXNENhh3ynny0effxP0uUTXMmF2C8J6D1bAJOtpsbk4n+eqAfYx9ICSti7fXN6oLDZ+DAQ==" length="3400206" />
     </item>
   </channel>
 </rss>

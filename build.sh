@@ -9,14 +9,9 @@
 ## @param   --install       replaces $INSTALL_DIR/<App>.app and relaunches it if it was
 ##                          running. INSTALL_DIR defaults to ~/Applications; set it in
 ##                          build.local (git ignores it) to install somewhere else.
-## @param   --release       builds for Apple silicon and Intel, signs with your Developer ID
+## @param   --release       builds for Apple silicon and Intel, signs,
 ##                          (hardened runtime), notarizes, staples, and zips it to
-##                          build/BobcatBar-<version>.zip for a GitHub release. Needs a
-##                          "Developer ID Application" certificate in the keychain and a
-##                          notarytool profile (NOTARY_PROFILE, default "notary"), made once with
-##                          xcrun notarytool store-credentials notary --apple-id <id> --team-id <team>
-##                          It also writes appcast.xml (the update feed), signed with the Sparkle
-##                          key in the login keychain (generate_keys --account bobcatbar).
+##                          build/BobcatBar-<version>.zip for a GitHub release. 
 set -euo pipefail
 cd "$(dirname "$0")"
 
